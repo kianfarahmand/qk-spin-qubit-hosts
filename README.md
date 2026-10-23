@@ -1,6 +1,6 @@
 # qk-spin-qubit-hosts
 
-Code and data for **"Where the analytic spin-coherence law fails: a CCE benchmark and a controlled test of quantum kernels for spin-qubit host screening"** (Kian Farahmand, FIIS). *Manuscript in preparation.*
+Code and data for **"Where the analytic spin-coherence law fails: a CCE benchmark and a controlled test of quantum kernels for spin-qubit host screening"** (Kian Farahmand, Department of Materials Science and Engineering, Shiraz University). *Manuscript in preparation.*
 
 > **Status:** pre-release. The package and tests are public. Datasets (D-CCE), per-fold predictions and the pre-registration will be added at submission, with a Zenodo DOI.
 

@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "qkhosts"
 version = "0.1.0.dev0"
 description = "Quantum-kernel learning of CCE spin-coherence for spin-qubit host screening"
-authors = [{name = "Kian Farahmand", email = "kianfarahmand@thefiis.com"}]
+authors = [{name = "Kian Farahmand", email = "k3farahmand@gmail.com"}]
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.24", "scipy>=1.10", "scikit-learn>=1.3", "pandas>=2.0", "pyyaml>=6"]
 

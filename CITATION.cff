@@ -4,8 +4,8 @@ title: "qk-spin-qubit-hosts: CCE benchmark and quantum-kernel learning for spin-
 authors:
   - family-names: Farahmand
     given-names: Kian
-    affiliation: "Frontier Institute for Intelligent Systems (FIIS)"
-    email: kianfarahmand@thefiis.com
+    affiliation: "Department of Materials Science and Engineering, Shiraz University"
+    email: k3farahmand@gmail.com
 version: 0.1.0.dev0
 license: MIT
 repository-code: "https://github.com/kianfarahmand/qk-spin-qubit-hosts"

@@ -1,0 +1,4 @@
+# E0 step 1: install PyCCE on the runner, record its API signatures, run a tiny diamond toy.
+id: 000-envcheck
+mode: envcheck
+nshards: 1

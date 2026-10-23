@@ -1,0 +1,103 @@
+# Free CCE compute on GitHub-hosted runners (public repo: free standard runners, 4 vCPU / 16 GB,
+# <= 6 h per job, <= 20 concurrent jobs on GitHub Free). See compute/README.md.
+# Trigger: push ONE new/changed file under compute/requests/ (or run manually with a request path).
+name: cce-batch
+on:
+  push:
+    branches: [main]
+    paths: ["compute/requests/*.yaml"]
+  workflow_dispatch:
+    inputs:
+      request: {description: "Path to request YAML (e.g. compute/requests/000-envcheck.yaml)", required: true}
+permissions:
+  contents: read
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      request: ${{ steps.p.outputs.request }}
+      id: ${{ steps.p.outputs.id }}
+      nshards: ${{ steps.p.outputs.nshards }}
+      shards: ${{ steps.p.outputs.shards }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 2}
+      - id: p
+        env:
+          INPUT_REQ: ${{ github.event.inputs.request }}
+        run: |
+          pip install -q pyyaml
+          if [ -n "$INPUT_REQ" ]; then REQ="$INPUT_REQ"; else
+            REQ=$(git diff --name-only --diff-filter=AM HEAD~1 HEAD -- 'compute/requests/*.yaml' | head -1); fi
+          echo "request=$REQ" >> "$GITHUB_OUTPUT"
+          if [ -z "$REQ" ]; then echo "no request file in this push"; exit 0; fi
+          python3 - "$REQ" >> "$GITHUB_OUTPUT" <<'PY'
+          import json, re, sys, yaml
+          r = yaml.safe_load(open(sys.argv[1]))
+          rid = str(r["id"])
+          assert re.fullmatch(r"[A-Za-z0-9._-]+", rid), "bad id"
+          n = int(r.get("nshards", 1)); assert 1 <= n <= 256
+          print(f"id={rid}"); print(f"nshards={n}"); print(f"shards={json.dumps(list(range(n)))}")
+          PY
+  run:
+    needs: plan
+    if: needs.plan.outputs.request != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: ${{ fromJSON(needs.plan.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11", cache: pip}
+      - run: pip install -e .[cce]
+      - name: run shard
+        env:
+          REQ: ${{ needs.plan.outputs.request }}
+          N: ${{ needs.plan.outputs.nshards }}
+          MP_API_KEY: ${{ secrets.MP_API_KEY }}
+        run: python -m qkhosts.labels.batch --request "$REQ" --shard ${{ matrix.shard }} --nshards "$N" --out cce_out
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cce-${{ needs.plan.outputs.id }}-shard-${{ matrix.shard }}
+          path: cce_out
+          retention-days: 3
+  collect:
+    needs: [plan, run]
+    if: always() && needs.plan.outputs.request != ''
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
+      REQ: ${{ needs.plan.outputs.request }}
+      RID: ${{ needs.plan.outputs.id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install -q numpy pyyaml
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cce-${{ needs.plan.outputs.id }}-shard-*
+          path: cce_out
+          merge-multiple: true
+      - run: PYTHONPATH=src python -m qkhosts.labels.batch --request "$REQ" --merge --out cce_out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cce-${{ needs.plan.outputs.id }}-merged
+          path: |
+            cce_out/merged.jsonl
+            cce_out/summary.json
+          retention-days: 7
+      - name: push results into the private repo
+        if: env.TOKEN != ''
+        run: |
+          git clone --depth 1 "https://x-access-token:${TOKEN}@github.com/kianfarahmand/qk-spin-qubit-hosts-private" priv
+          D="priv/results/cce/$RID"; mkdir -p "$D"
+          cp cce_out/merged.jsonl cce_out/summary.json "$D/"; cp "$REQ" "$D/request.yaml"
+          echo "{\"run_id\": \"${{ github.run_id }}\", \"public_sha\": \"${{ github.sha }}\"}" > "$D/provenance.json"
+          cd priv && git config user.name "cce-bot" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "results/cce/$RID" && git commit -m "CCE results: $RID (public run ${{ github.run_id }})" && git pull --rebase -q && git push

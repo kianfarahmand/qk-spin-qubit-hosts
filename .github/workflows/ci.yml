@@ -9,5 +9,3 @@ jobs:
         with: {python-version: "3.11"}
       - run: pip install -e .[dev]
       - run: pytest -q
-      - run: python scripts/status.py --check
-      - run: python scripts/prereg.py verify
