@@ -1,0 +1,4 @@
+# Pins for the CCE runner. PyCCE imports scipy.sparse.sputils.isintlike, which newer SciPy removed
+# (seen in run 001-envcheck, S002). Loosen only after an envcheck passes with newer versions.
+numpy<2
+scipy<1.12

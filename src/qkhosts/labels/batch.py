@@ -34,11 +34,12 @@ from qkhosts.labels.pycce_runner import CCEProtocol, fit_t2, protocol_hash, run_
 
 def _versions() -> dict:
     out = {"python": platform.python_version(), "platform": platform.platform()}
+    from importlib import metadata
     for m in ("numpy", "scipy", "pycce", "ase", "pymatgen"):
         try:
-            out[m] = getattr(__import__(m), "__version__", "installed")
-        except Exception as e:  # noqa: BLE001
-            out[m] = f"MISSING ({type(e).__name__})"
+            out[m] = metadata.version(m)
+        except metadata.PackageNotFoundError:
+            out[m] = "not installed"
     return out
 
 

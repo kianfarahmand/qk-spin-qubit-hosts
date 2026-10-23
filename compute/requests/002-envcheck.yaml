@@ -1,0 +1,4 @@
+id: 002-envcheck
+mode: envcheck
+nshards: 1
+# pinned numpy<2, scipy<1.12 (compute/constraints-cce.txt)
