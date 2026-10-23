@@ -18,6 +18,7 @@ jobs:
       request: ${{ steps.p.outputs.request }}
       id: ${{ steps.p.outputs.id }}
       nshards: ${{ steps.p.outputs.nshards }}
+      mode: ${{ steps.p.outputs.mode }}
       shards: ${{ steps.p.outputs.shards }}
     steps:
       - uses: actions/checkout@v4
@@ -37,7 +38,7 @@ jobs:
           rid = str(r["id"])
           assert re.fullmatch(r"[A-Za-z0-9._-]+", rid), "bad id"
           n = int(r.get("nshards", 1)); assert 1 <= n <= 256
-          print(f"id={rid}"); print(f"nshards={n}"); print(f"shards={json.dumps(list(range(n)))}")
+          print(f"id={rid}"); print(f"mode={r['mode']}"); print(f"nshards={n}"); print(f"shards={json.dumps(list(range(n)))}")
           PY
   run:
     needs: plan
@@ -70,8 +71,11 @@ jobs:
     needs: [plan, run]
     if: always() && needs.plan.outputs.request != ''
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # only for the envcheck fallback branch below
     env:
       TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN }}
+      MODE: ${{ needs.plan.outputs.mode }}
       REQ: ${{ needs.plan.outputs.request }}
       RID: ${{ needs.plan.outputs.id }}
     steps:
@@ -101,3 +105,13 @@ jobs:
           echo "{\"run_id\": \"${{ github.run_id }}\", \"public_sha\": \"${{ github.sha }}\"}" > "$D/provenance.json"
           cd priv && git config user.name "cce-bot" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "results/cce/$RID" && git commit -m "CCE results: $RID (public run ${{ github.run_id }})" && git pull --rebase -q && git push
+      - name: fallback for diagnostics only (no token) -> public branch compute-results
+        # Sandboxed Claude sessions cannot download artifacts, so envcheck diagnostics (no research data)
+        # are committed to a branch of this public repo. CCE labels (mode cce) are never written here.
+        if: env.TOKEN == '' && env.MODE == 'envcheck'
+        run: |
+          git config user.name "cce-bot" && git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch -q origin compute-results && git checkout -q compute-results || git checkout -q --orphan compute-results
+          git rm -rq --cached . >/dev/null 2>&1 || true
+          mkdir -p "diagnostics/$RID" && cp cce_out/merged.jsonl cce_out/summary.json "diagnostics/$RID/"
+          git add "diagnostics/$RID" && git commit -qm "diagnostics: $RID (run ${{ github.run_id }})" && git push -q origin compute-results

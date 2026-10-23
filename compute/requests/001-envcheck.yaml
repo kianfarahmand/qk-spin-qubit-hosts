@@ -1,0 +1,4 @@
+# Re-run of 000-envcheck after adding the diagnostics fallback (artifacts are not downloadable from Claude sandboxes).
+id: 001-envcheck
+mode: envcheck
+nshards: 1
