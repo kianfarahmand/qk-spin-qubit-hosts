@@ -1,0 +1,26 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+.env.*
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+# large / regenerable data & results (small curated files are force-added)
+data/raw/**
+data/interim/**
+!data/**/README.md
+!data/**/.gitkeep
+results/**/predictions*.parquet
+results/**/*.npy
+results/**/cce_raw/
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+paper/main.pdf

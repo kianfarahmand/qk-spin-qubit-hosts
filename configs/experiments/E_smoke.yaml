@@ -1,0 +1,5 @@
+id: E_smoke
+kind: smoke
+seed: 0
+n: 80
+q: 4

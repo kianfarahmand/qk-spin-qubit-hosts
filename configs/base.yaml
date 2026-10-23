@@ -1,0 +1,39 @@
+# Shared settings. Experiment configs (configs/experiments/E*.yaml) override keys here.
+project: qk-spin-qubit-hosts
+seeds: [0, 1, 2, 3, 4]
+
+scaling_law:            # Kanai et al. PNAS 2022, Eq. 1-2 — VERIFY (T-003) then set verified: true
+  A: 1.5e18             # s
+  alpha: -1.6           # |g|
+  beta: -1.1            # I
+  gamma: -1.0           # n [cm^-3]
+  eta: 2.0
+  verified: false
+
+data:
+  mp_filters: {energy_above_hull: 0.0, band_gap_min_eV: 1.0}
+  dedup_key: [reduced_formula, spacegroup_number]
+  group_key: chemsys
+
+splits:
+  primary: {kind: group_kfold, k: 5, repeats: 5}
+  inner: {kind: group_kfold, k: 3}
+  learning_curve_N: [25, 50, 100, 200, 400, max]
+
+budget:
+  hparam_evals_per_family: 30   # equal-budget rule (prereg §3)
+
+quantum:
+  qubits: [4, 6, 8, 12, 16]
+  layers: [1, 2, 3]
+  bandwidth: {logspace: [-2, 0.5, 6]}
+  maps: [iqp, hea, product_angle]
+  kernels: [fidelity, projected]
+  shots: [256, 1024, 4096]
+
+classical:
+  kernels: [rbf, matern52, ard_rbf, product_cos2]
+  trees: [random_forest, hist_gbt]
+  linear: [ridge]
+
+estimators: [krr, svr, gp]
