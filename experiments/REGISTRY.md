@@ -1,6 +1,6 @@
 # Experiment registry
 
-Definitions are in `proposal/proposal_v2.md` §10. Each run writes `results/<EID>/<run-id>/` and gets a row here.
+Each run writes `results/<EID>/<run-id>/` and gets a row here.
 
 | EID | Purpose | Status | Config | Key result file |
 |---|---|---|---|---|
