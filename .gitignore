@@ -24,3 +24,4 @@ paper/*.fls
 paper/*.fdb_latexmk
 paper/*.synctex.gz
 paper/main.pdf
+results/**/predictions*.csv.gz

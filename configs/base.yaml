@@ -2,13 +2,16 @@
 project: qk-spin-qubit-hosts
 seeds: [0, 1, 2, 3, 4]
 
-scaling_law:            # Kanai et al. PNAS 2022, Eq. 1-2 — VERIFY (T-003) then set verified: true
-  A: 1.5e18             # s
-  alpha: -1.6           # |g|
-  beta: -1.1            # I
-  gamma: -1.0           # n [cm^-3]
-  eta: 2.0
-  verified: false
+scaling_law:            # Kanai et al. PNAS 119(15) e2121808119 (2022), Eq. 1-2; verified S004 (T-003, ADR-0002)
+  # Eq. 2 prints the rounded fit 1.5e18 |g|^-1.6 I^-1.1 n^-1.0 (s, n in cm^-3). The authors' script
+  # (data/external/kanai2022/T2_Listup_v1.0.py, PyT2Ele) uses alpha=-1.65, beta=-1.09; only those
+  # reproduce the published Fig. 3 values (max |dlog10 T2| 0.0015 vs 0.053; tests/test_kanai_reproduction.py).
+  A: 1.5e18             # s cm^-3 (paper: "c = 1.5 x 10^18 cm^-3 s"; script: A = 1.50e18)
+  alpha: -1.65          # |g|  (script f_g; paper Eq. 2 rounds to -1.6; fitted beta = -1.64 +- 0.07, text near Fig. 2C)
+  beta: -1.09           # I    (script f_I; paper Eq. 2 rounds to -1.1; fit -1.10 +- 0.03, Fig. 2C)
+  gamma: -1.0           # n [cm^-3] (Eq. 2; script divides by abundance * density)
+  eta: 2.0              # Eq. 1: eta_i = eta' = 2 (Methods, "Stretching Exponent"); script n = 2
+  verified: true
 
 data:
   mp_filters: {energy_above_hull: 0.0, band_gap_min_eV: 1.0}

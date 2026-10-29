@@ -1,0 +1,237 @@
+{
+ "doi": "10.5281/zenodo.6323098",
+ "conceptdoi": "10.5281/zenodo.6323097",
+ "title": "Dataset: \"Generalized scaling of spin qubit coherence in over 12,000 host materials\"",
+ "publication_date": "2022-03-02",
+ "license": "cc-by-4.0",
+ "creators": [
+  "Kanai, Shun",
+  "Heremans, Joseph F.",
+  "Seo, Hosung",
+  "Wolfowicz, Gary",
+  "Anderson, Christopher P.",
+  "Sullivan, Sean E.",
+  "Onizhuk, Mykyta",
+  "Galli, Giulia",
+  "Awschalom, David D.",
+  "Ohno, Hideo"
+ ],
+ "files": [
+  {
+   "key": "LinTransToSetVectorTo001.m",
+   "size": 602,
+   "checksum": "md5:8451d46faa58f569b59098cfd335a230",
+   "fetched": true
+  },
+  {
+   "key": "MainCalcFromCIF.m",
+   "size": 207,
+   "checksum": "md5:cd9257bf4db8877209c1486fe9f93d6b",
+   "fetched": true
+  },
+  {
+   "key": "T2_Listup_v1.0.py",
+   "size": 5081,
+   "checksum": "md5:15a25cceecd316a9b2ccd7e7264e8b88",
+   "fetched": true
+  },
+  {
+   "key": "arxiv2102.02986.zip",
+   "size": 6299012,
+   "checksum": "md5:fb792ed194371a21a7a15122b4b26b32",
+   "fetched": false
+  },
+  {
+   "key": "figure1c.csv",
+   "size": 66156,
+   "checksum": "md5:edd1ad9ce3cc6b0ee71618b370839774",
+   "fetched": true
+  },
+  {
+   "key": "figure2a.csv",
+   "size": 1419,
+   "checksum": "md5:4092258f230ce416325c639f04776604",
+   "fetched": true
+  },
+  {
+   "key": "figure2b.csv",
+   "size": 5826,
+   "checksum": "md5:168c9f8d2c9ca6e6a9c6f8b776fd5725",
+   "fetched": true
+  },
+  {
+   "key": "figure2c.csv",
+   "size": 1036,
+   "checksum": "md5:06b6a665edcec053805ba536621806e3",
+   "fetched": true
+  },
+  {
+   "key": "figure2d.csv",
+   "size": 5966,
+   "checksum": "md5:7c785b6cc7aa0aeb3d6a53c360cddfe0",
+   "fetched": true
+  },
+  {
+   "key": "figure2e.csv",
+   "size": 1434,
+   "checksum": "md5:26a1ee192ba999bc6d1a734f7945d4e0",
+   "fetched": true
+  },
+  {
+   "key": "figure3.csv",
+   "size": 1149,
+   "checksum": "md5:3b2c1309d0cff5adb86855050c4af517",
+   "fetched": true
+  },
+  {
+   "key": "figure4.csv",
+   "size": 331,
+   "checksum": "md5:7c75dcaedf32bf7def526a88cdb16b62",
+   "fetched": true
+  },
+  {
+   "key": "figureS2_FID.csv",
+   "size": 20148,
+   "checksum": "md5:1a9124e0d340d269d621cd2af411751f",
+   "fetched": true
+  },
+  {
+   "key": "figureS2_Hahn.csv",
+   "size": 20551,
+   "checksum": "md5:5cefb7ba2ff9b34741da64c61ddb5276",
+   "fetched": true
+  },
+  {
+   "key": "figureS4.csv",
+   "size": 6870,
+   "checksum": "md5:90b23a70bdd0a723374f5d0f32f6db33",
+   "fetched": true
+  },
+  {
+   "key": "figureS5.csv",
+   "size": 1582,
+   "checksum": "md5:d4990358b21c50daa21adfbfe2a95922",
+   "fetched": true
+  },
+  {
+   "key": "figureS6.csv",
+   "size": 3178,
+   "checksum": "md5:91064dab2be98c5c9dd7b4b448f298ae",
+   "fetched": true
+  },
+  {
+   "key": "figureS6.png",
+   "size": 329789,
+   "checksum": "md5:deae5d35503ef45c02b86ed58b2b2178",
+   "fetched": false
+  },
+  {
+   "key": "figureS7.csv",
+   "size": 5583,
+   "checksum": "md5:2cf17bf8b21d8c90bfe9b2ae89a5e7cd",
+   "fetched": true
+  },
+  {
+   "key": "figureS7.png",
+   "size": 168190,
+   "checksum": "md5:d0de1548172b682af167c960d9be4bf5",
+   "fetched": false
+  },
+  {
+   "key": "figureS8a.csv",
+   "size": 474,
+   "checksum": "md5:9d7bb6f8e556bb2fe1a759e76f18dbd9",
+   "fetched": true
+  },
+  {
+   "key": "figureS8a.png",
+   "size": 71166,
+   "checksum": "md5:9629bd9cba478d23569a43c430743b36",
+   "fetched": false
+  },
+  {
+   "key": "figureS8b.csv",
+   "size": 476,
+   "checksum": "md5:0520d11d90bbdfc564c34f945a9036fe",
+   "fetched": true
+  },
+  {
+   "key": "figureS8b.png",
+   "size": 59214,
+   "checksum": "md5:f4ead172cf8eac9b5f8de1acfc2d6e59",
+   "fetched": false
+  },
+  {
+   "key": "figureS8c.csv",
+   "size": 299,
+   "checksum": "md5:b4530d927111fa057cf2366e87588102",
+   "fetched": true
+  },
+  {
+   "key": "figureS8c.png",
+   "size": 43949,
+   "checksum": "md5:a82177a5d9b717c93da2c2092d2960f3",
+   "fetched": false
+  },
+  {
+   "key": "figureS8d.csv",
+   "size": 261,
+   "checksum": "md5:c38820e821e976cf726e857a0540f059",
+   "fetched": true
+  },
+  {
+   "key": "figureS8d.png",
+   "size": 29386,
+   "checksum": "md5:855b472bf515501809b3a0ce999ae7a9",
+   "fetched": false
+  },
+  {
+   "key": "isotopetable.csv",
+   "size": 4342,
+   "checksum": "md5:aa80de39f47bcb56dcce794af7782787",
+   "fetched": true
+  },
+  {
+   "key": "kronDel.m",
+   "size": 935,
+   "checksum": "md5:9efac5f24ca9ba1deaed276fb10fa82a",
+   "fetched": true
+  },
+  {
+   "key": "load_crystal.m",
+   "size": 11737,
+   "checksum": "md5:7373a03e3781e23e3514183da504c928",
+   "fetched": true
+  },
+  {
+   "key": "screenshot_SK.m",
+   "size": 811,
+   "checksum": "md5:f6061675a0c91825c81aaa37bb40d336",
+   "fetched": true
+  },
+  {
+   "key": "set_crystal_v2.m",
+   "size": 7594,
+   "checksum": "md5:94915b82b5f6df5082d4d343ee9e8b17",
+   "fetched": true
+  },
+  {
+   "key": "spinoperator.m",
+   "size": 1500,
+   "checksum": "md5:71b90798532aca042cd47374134617cd",
+   "fetched": true
+  },
+  {
+   "key": "table1.csv",
+   "size": 2139,
+   "checksum": "md5:fbf08b36bafeff8fe2db62f032883576",
+   "fetched": true
+  },
+  {
+   "key": "table1.png",
+   "size": 199887,
+   "checksum": "md5:578fd1adf1c55da8554c2c8ccba6e2ab",
+   "fetched": false
+  }
+ ]
+}

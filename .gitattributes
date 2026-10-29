@@ -1,0 +1,4 @@
+# Third-party files are checksummed byte-for-byte (SHA256SUMS): never convert line endings.
+data/external/** -text
+# E0+ host structures: SOURCES.json records each CIF's SHA-256, so keep them byte-exact too (S010).
+compute/structures/** -text

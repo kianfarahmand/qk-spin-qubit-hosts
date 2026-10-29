@@ -19,6 +19,10 @@ def r2(y, p):
 
 
 def spearman(y, p):
+    """Spearman rho; NaN (without a warning) when either input is constant, e.g. the B0 = 0 baseline."""
+    y, p = np.asarray(y), np.asarray(p)
+    if np.ptp(y) == 0 or np.ptp(p) == 0:
+        return float("nan")
     return float(spearmanr(y, p).statistic)
 
 

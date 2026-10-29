@@ -46,3 +46,10 @@ def test_densities_and_descriptors():
 def test_isotope_table_validation():
     with pytest.raises(ValueError):
         normalise(pd.DataFrame({"element": ["A"], "isotope": ["A1"], "abundance": [0.5], "spin_I": [0.5], "g_factor": [1.0]}))
+
+
+def test_from_config_casts_yaml_strings():
+    # PyYAML loads "1.5e18" (no sign in the exponent) as a str; from_config must cast.
+    import yaml
+    p = ScalingLawParams.from_config(yaml.safe_load("A: 1.5e18\nalpha: -1.65\nverified: true"))
+    assert isinstance(p.A, float) and p.A == 1.5e18 and p.alpha == -1.65 and p.verified

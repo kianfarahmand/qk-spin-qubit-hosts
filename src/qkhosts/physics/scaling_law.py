@@ -5,10 +5,10 @@ Per isotope i (dilute regime, n_i < ~1e22 cm^-3):
 Compound:
     T2 = ( sum_i T2_i**(-eta) )**(-1/eta)                       (eta ~ 2)
 
-STATUS: constants are the values reported in arXiv:2102.02986 (A=1.5e18 s, alpha=-1.6,
-beta=-1.1, gamma=-1.0, eta=2) and MUST be re-verified against Eq. 1-2 and the Zenodo
-script T2_Listup_v1.0.py (task T-003) before any result is reported. They are therefore
-read from configs/base.yaml, not hard-coded at call sites.
+Constants (verified in T-003, ADR-0002): A=1.5e18 s cm^-3, alpha=-1.65, beta=-1.09, gamma=-1.0,
+eta=2. Eq. 2 of the PNAS paper prints alpha, beta rounded to -1.6, -1.1; the authors' Zenodo script
+T2_Listup_v1.0.py uses -1.65, -1.09, and only those reproduce the published values. Read them from
+configs/base.yaml; do not hard-code them at call sites.
 """
 from __future__ import annotations
 
@@ -23,15 +23,17 @@ DENSE_THRESHOLD_CM3 = 1e22  # upper validity bound of the n^-1 regime stated by 
 @dataclass(frozen=True)
 class ScalingLawParams:
     A: float = 1.5e18
-    alpha: float = -1.6
-    beta: float = -1.1
+    alpha: float = -1.65
+    beta: float = -1.09
     gamma: float = -1.0
     eta: float = 2.0
-    verified: bool = False  # flip to True only after T-003
+    verified: bool = False  # True only via configs/base.yaml (T-003 done)
 
     @classmethod
     def from_config(cls, cfg: Mapping) -> "ScalingLawParams":
-        return cls(**{k: cfg[k] for k in ("A", "alpha", "beta", "gamma", "eta", "verified") if k in cfg})
+        # float(): PyYAML (YAML 1.1) loads "1.5e18" without a sign/dot rule match as a string.
+        vals = {k: float(cfg[k]) for k in ("A", "alpha", "beta", "gamma", "eta") if k in cfg}
+        return cls(**vals, verified=bool(cfg.get("verified", False)))
 
 
 def t2_isotope(g: np.ndarray, spin_I: np.ndarray, n_cm3: np.ndarray, p: ScalingLawParams) -> np.ndarray:

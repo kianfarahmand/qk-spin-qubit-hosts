@@ -78,3 +78,12 @@ def test_active_learning_beats_random_on_smooth_target():
     ucb = [labels_to_recall(run_al(K, y, 5, 5, 20, "ucb", seed=s, gp_kwargs={"noise": 1e-3})["recall"], 5, 5) or 999 for s in range(3)]
     rnd = [labels_to_recall(run_al(K, y, 5, 5, 20, "random", seed=s)["recall"], 5, 5) or 999 for s in range(3)]
     assert np.median(ucb) < np.median(rnd)
+
+
+def test_spearman_constant_input_is_nan_without_warning():
+    import warnings
+    from qkhosts.eval.metrics import spearman
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        assert np.isnan(spearman([1.0, 2.0, 3.0], [0.0, 0.0, 0.0]))
+    assert spearman([1, 2, 3], [1, 2, 3]) == 1.0

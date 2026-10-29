@@ -14,7 +14,12 @@ import pandas as pd
 REQUIRED = ("element", "isotope", "abundance", "spin_I", "g_factor")
 
 
-def normalise(df: pd.DataFrame, colmap: dict[str, str] | None = None) -> pd.DataFrame:
+def normalise(df: pd.DataFrame, colmap: dict[str, str] | None = None, check_sums: bool = True) -> pd.DataFrame:
+    """Rename to REQUIRED columns, convert percent abundance to a fraction, validate.
+
+    check_sums=False is for tables that list only spinful isotopes (Kanai's), whose abundances
+    per element do not add up to 1.
+    """
     if colmap:
         df = df.rename(columns=colmap)
     missing = [c for c in REQUIRED if c not in df.columns]
@@ -26,14 +31,34 @@ def normalise(df: pd.DataFrame, colmap: dict[str, str] | None = None) -> pd.Data
     if (df["abundance"] < 0).any() or (df["spin_I"] < 0).any():
         raise ValueError("negative abundance or spin")
     sums = df.groupby("element")["abundance"].sum()
-    bad = sums[(sums - 1.0).abs() > 0.02]
-    if len(bad):
-        raise ValueError(f"abundances do not sum to ~1 for: {list(bad.index)[:10]}")
+    if check_sums:
+        bad = sums[(sums - 1.0).abs() > 0.02]
+        if len(bad):
+            raise ValueError(f"abundances do not sum to ~1 for: {list(bad.index)[:10]}")
+    elif (sums > 1.0 + 1e-6).any():
+        raise ValueError(f"abundances sum to > 1 for: {list(sums[sums > 1.0 + 1e-6].index)[:10]}")
     return df.reset_index(drop=True)
 
 
 def load_isotope_table(path: str | Path, colmap: dict[str, str] | None = None) -> pd.DataFrame:
     return normalise(pd.read_csv(path), colmap)
+
+
+KANAI_COLMAP = {"symbol": "element", "s": "spin_I", "g": "g_factor", "natural abundance %": "abundance"}
+
+
+def load_kanai_isotope_table(path: str | Path) -> pd.DataFrame:
+    """Load Kanai et al. Zenodo `isotopetable.csv` (data/external/kanai2022/, T-004).
+
+    It lists only stable isotopes with nuclear spin I > 0 (119 rows, 80 elements); abundance is in
+    percent and becomes a fraction. `isotope` is built as e.g. "13C". Elements absent from the file
+    (e.g. Ce, Ar) have no spinful stable isotope in this table.
+    """
+    raw = pd.read_csv(path)
+    raw["isotope"] = raw["#nucleons"].astype(int).astype(str) + raw["symbol"]
+    df = raw.rename(columns=KANAI_COLMAP)
+    df["abundance"] = df["abundance"] / 100.0
+    return normalise(df, check_sums=False)
 
 
 def spinful(df: pd.DataFrame) -> pd.DataFrame:

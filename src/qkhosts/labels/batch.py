@@ -58,6 +58,8 @@ def envcheck() -> dict:
             "has_CenterArray": hasattr(pc, "CenterArray"),
             "Simulator_init": str(inspect.signature(pc.Simulator.__init__)),
             "Simulator_compute": str(inspect.signature(pc.Simulator.compute)),
+            "has_BathCell_to_cartesian": hasattr(getattr(pc, "BathCell", None), "to_cartesian"),
+            "BathCell_gen_supercell": str(inspect.signature(pc.BathCell.gen_supercell)),
         }
         atoms_ase = bulk("C", "diamond", cubic=True)
         cell = pc.read_ase(atoms_ase) if hasattr(pc, "read_ase") else pc.BathCell.from_ase(atoms_ase)
@@ -97,7 +99,7 @@ def _protocol(req: dict) -> CCEProtocol:
 def run_shard(req: dict, shard: int, nshards: int, out: Path, root: Path) -> int:
     out.mkdir(parents=True, exist_ok=True)
     path = out / f"shard_{shard}.jsonl"
-    with path.open("w") as f:
+    with path.open("w", encoding="utf-8") as f:
         if req["mode"] == "envcheck":
             rec = {"request": req["id"], "shard": shard, **envcheck()}
             f.write(json.dumps(rec, default=str) + "\n")
@@ -122,11 +124,11 @@ def run_shard(req: dict, shard: int, nshards: int, out: Path, root: Path) -> int
 
 
 def merge(out: Path) -> Path:
-    recs = [json.loads(line) for p in sorted(out.rglob("shard_*.jsonl")) for line in p.read_text().splitlines() if line]
+    recs = [json.loads(line) for p in sorted(out.rglob("shard_*.jsonl")) for line in p.read_text(encoding="utf-8").splitlines() if line]
     merged = out / "merged.jsonl"
-    merged.write_text("".join(json.dumps(r, default=str) + "\n" for r in recs))
+    merged.write_text("".join(json.dumps(r, default=str) + "\n" for r in recs), encoding="utf-8")
     summary = {"n_records": len(recs), "n_ok": sum(bool(r.get("ok", "error" not in r)) for r in recs)}
-    (out / "summary.json").write_text(json.dumps(summary, indent=1))
+    (out / "summary.json").write_text(json.dumps(summary, indent=1), encoding="utf-8")
     print(summary)
     return merged
 
@@ -140,7 +142,7 @@ def main(argv=None) -> int:
     ap.add_argument("--merge", action="store_true")
     ap.add_argument("--root", default=".")
     a = ap.parse_args(argv)
-    req = yaml.safe_load(Path(a.request).read_text())
+    req = yaml.safe_load(Path(a.request).read_text(encoding="utf-8"))
     for k in ("id", "mode"):
         if k not in req:
             raise SystemExit(f"request missing '{k}'")

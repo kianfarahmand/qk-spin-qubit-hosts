@@ -1,0 +1,20 @@
+# Synthetic end-to-end check of the E3 pipeline (T-030). NOT a result: the data are generated, not D-CCE.
+# Real E3 (T-031) gets its own config with data.source = dcce and eval.outer = false until prereg/LOCK.
+id: E3_synthetic
+kind: e3
+data:
+  source: synthetic
+  synthetic: {n: 150, d: 6, n_groups: 30, noise: 0.05, seed: 0}
+splits:
+  primary: {kind: group_kfold, k: 5, repeats: 2}
+  learning_curve_N: [25, 50, max]
+budget:
+  hparam_evals_per_family: 10
+e3:
+  estimator: krr
+  families: [rbf, matern52, linear]
+  alpha_logspace: [-6, 0, 5]
+  rbf: {ls_logspace: [-1, 1, 7]}
+  matern52: {ls_logspace: [-1, 1, 7]}
+eval:
+  outer: true

@@ -34,7 +34,7 @@ def main() -> int:
     if not (dest / ".git").exists():
         print(f"{dest} is not a git clone", file=sys.stderr)
         return 1
-    pats = [l.strip() for l in MANIFEST.read_text().splitlines() if l.strip() and not l.startswith("#")]
+    pats = [l.strip() for l in MANIFEST.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")]
     files: set[Path] = set()
     for pat in pats:
         files |= {p for p in ROOT.glob(pat) if p.is_file()}

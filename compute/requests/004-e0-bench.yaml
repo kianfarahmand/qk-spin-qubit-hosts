@@ -1,0 +1,36 @@
+# LAUNCHED S010 (2026-10-29) with Kian's OK (moved from compute/drafts/). Results: results/cce/004-e0-bench/
+# (token path) or `python scripts/fetch_cce_results.py 004-e0-bench` (local gh path, within 7 days).
+#
+#
+# Purpose: E0 benchmark of our label protocol (ADR-0004 draft) on hosts whose B axis is the c axis.
+# Targets (Kanai Table S1, SI p. 20, S = 1/2, 5 T; literature/notes/kanai2022_si.md):
+#   4H-SiC 1.35(9) ms, alpha-quartz 3.42(15) ms.
+# Cross-protocol (Toriyama 2025, spin-1, one site; data/interim/toriyama2025/substrates.csv): SiO2_Quartz 3.33 ms.
+# Experimental anchors (data/external/experimental_T2.csv): 4H-SiC divacancy 1.25(5) ms (A003), ~1.3 ms (A004).
+#
+# Field frame: Kanai Fig. 2A puts z along [001] for non-diamond structures; our b_direction (0,0,1) is
+# Cartesian z, which is the c axis for pymatgen-written hexagonal/trigonal CIFs. Check on real PyCCE (T-010 point 4).
+#
+# Structures (S010, T-064): fetched keylessly from MP OPTIMADE by scripts/fetch_structures_optimade.py, using the
+# mp-ids in Kanai's own code (set_crystal_v2.m): 4H-SiC mp-11714 (l.44), alpha-quartz mp-6930 (l.38; mp-7000 is the
+# other enantiomer). Provenance + SHA-256: compute/structures/e0/SOURCES.json; DATA_CARD row "MP OPTIMADE E0".
+#
+# Also answers T-010 open points: inequivalent-site averaging (4H-SiC has 2 Si and 2 C sites; run_material
+# records per-site T2 so 1-site vs multi-site can be compared from the same run), curve-average vs
+# mean-of-fits T2 (both recorded), convergence ladder, and wall time per material (sizes E2 shards).
+id: 004-e0-bench
+mode: cce
+nshards: 2            # one material per shard; 6 h job limit
+protocol:
+  central_spin: 0.5
+  b_field_T: 5.0
+  b_direction: [0.0, 0.0, 1.0]
+  order: 2
+  ladder: [[50.0, 15.0], [65.0, 20.0], [80.0, 25.0]]
+  n_conf: 20
+  n_sites_max: 3
+  as_delay: false
+  seed: 0
+materials:
+  - {id: 4H-SiC, cif: compute/structures/e0/SiC_4H.cif}
+  - {id: alpha-quartz, cif: compute/structures/e0/SiO2_alpha_quartz.cif}
