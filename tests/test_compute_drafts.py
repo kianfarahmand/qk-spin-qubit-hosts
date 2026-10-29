@@ -24,7 +24,9 @@ def test_draft_request_is_valid(path):
     assert proto.as_delay is False and proto.b_field_T == 5.0
     assert isinstance(protocol_hash(proto), str)
     assert 1 <= req["nshards"] <= len(req["materials"])
+    assert len({m["id"] for m in req["materials"]}) == len(req["materials"]), "item ids name the outputs"
     for m in req["materials"]:
+        assert _protocol(req, m).as_delay is False  # per-item overrides must be valid too
         assert m["cif"].startswith("compute/structures/")
         assert (ROOT / m["cif"]).is_file(), f"{m['cif']} missing (scripts/fetch_structures_optimade.py)"
 

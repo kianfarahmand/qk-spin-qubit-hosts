@@ -10,6 +10,7 @@ Request file (YAML):
     protocol: {...}             # CCEProtocol overrides (mode cce)
     materials:                  # mode cce: list of {id, cif} (cif path relative to repo root)
       - {id: mp-149, cif: compute/structures/mp-149.cif}
+      - {id: mp-149-gcce, cif: compute/structures/mp-149.cif, protocol: {method: gcce}}  # per-item overrides
 
 Every job writes <OUT>/shard_<I>.jsonl, one JSON record per material, with errors captured rather than
 raised, so one bad material never kills a shard.
@@ -87,9 +88,10 @@ def envcheck() -> dict:
     return rep
 
 
-def _protocol(req: dict) -> CCEProtocol:
+def _protocol(req: dict, item: dict | None = None) -> CCEProtocol:
+    """Request-level protocol, updated by the item's own `protocol` overrides (diagnostic variants)."""
     names = {f.name for f in fields(CCEProtocol)}
-    over = req.get("protocol", {}) or {}
+    over = {**(req.get("protocol", {}) or {}), **((item or {}).get("protocol", {}) or {})}
     bad = set(over) - names
     if bad:
         raise ValueError(f"unknown protocol keys {sorted(bad)}")
@@ -105,14 +107,14 @@ def run_shard(req: dict, shard: int, nshards: int, out: Path, root: Path) -> int
             f.write(json.dumps(rec, default=str) + "\n")
             print(json.dumps(rec, indent=1, default=str))
             return 0
-        proto = _protocol(req)
         items = req.get("materials", [])[shard::nshards]
         for it in items:
             t0 = time.time()
+            proto = _protocol(req, it)
             rec = {"request": req["id"], "shard": shard, "id": it["id"], "protocol_hash": protocol_hash(proto),
                    "protocol": asdict(proto)}
             try:
-                rec.update(run_material(root / it["cif"], proto, out / "per_material"))
+                rec.update(run_material(root / it["cif"], proto, out / "per_material", name=it["id"]))
                 rec["ok"] = True
             except Exception as e:  # noqa: BLE001
                 rec.update(ok=False, error=f"{type(e).__name__}: {e}", traceback=traceback.format_exc()[-2000:])

@@ -25,3 +25,15 @@ def test_cce_mode_captures_errors(tmp_path):
         assert main(["--request", str(req), "--shard", str(s), "--out", str(out), "--root", str(tmp_path)]) == 0
     recs = [json.loads(l) for p in sorted(out.glob("shard_*.jsonl")) for l in p.read_text().splitlines()]
     assert {r["id"] for r in recs} == {"a", "b"} and not any(r["ok"] for r in recs)
+
+
+def test_item_protocol_overrides_request():
+    import pytest
+    from qkhosts.labels.batch import _protocol
+
+    req = {"protocol": {"order": 2, "n_conf": 5}}
+    p = _protocol(req, {"id": "x", "protocol": {"method": "gcce", "order": 3}})
+    assert (p.method, p.order, p.n_conf) == ("gcce", 3, 5)
+    assert _protocol(req).method == "cce"
+    with pytest.raises(ValueError):
+        _protocol(req, {"protocol": {"nope": 1}})

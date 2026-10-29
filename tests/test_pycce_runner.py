@@ -27,7 +27,7 @@ class FakeCell:
     cell = np.eye(3) * 4.0  # columns = lattice vectors (PyCCE convention)
 
     def gen_supercell(self, size, remove=None, seed=None):
-        return FakeBath(seed, remove[0][0])
+        return FakeBath(seed, remove[0][0] if remove else "")
 
 
 def make_fake(t2_base, r_scale=10.0, amp=2.0):
@@ -38,6 +38,7 @@ def make_fake(t2_base, r_scale=10.0, amp=2.0):
             CALLS.append(kw)
 
         def compute(self, ts, method, quantity):
+            self.kw["method"] = method
             b = self.kw["bath"]
             t2 = t2_base[b.removed] * (1 + amp * np.exp(-self.kw["r_bath"] / r_scale))
             t2 *= 1 + 0.01 * ((b.seed % 3) - 1)
@@ -141,3 +142,47 @@ def test_ladder_reuses_window_and_seeds(fake, tmp_path):
     for kw in CALLS:
         seeds[kw["r_bath"]].append(kw["bath"].seed)
     assert set(seeds[65.0]) == set(seeds[50.0]) == {1, 2}
+
+
+def test_nls_fit_recovers_stretched_exponential():
+    t = np.linspace(0, 3, 201)
+    t2, n = pr.fit_t2_nls(t, np.exp(-(t / 0.97) ** 2.64))
+    assert t2 == pytest.approx(0.97, rel=1e-4) and n == pytest.approx(2.64, rel=1e-4)
+    assert np.isnan(pr.fit_t2_nls(t, np.ones_like(t))[0])
+
+
+def test_diagnostics_recorded(fake, tmp_path):
+    """S011: per-config fits, NLS fit, mean curve, spins inside r_bath and the method are recorded."""
+    fake({"Si": 1.0}, SI)
+    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=3, method="gcce"), tmp_path / "out")
+    st = res["sites"][0]["final"]
+    assert len(st["per_conf_t2_ms"]) == len(st["per_conf_n"]) == 3
+    assert all(n == pytest.approx(2.0, abs=1e-6) for n in st["per_conf_n"])
+    assert st["t2_ms_nls"] == pytest.approx(st["t2_ms"], rel=0.01)
+    assert len(st["curve_t_ms"]) == len(st["curve_mean"]) == CCEProtocol().n_t
+    assert st["n_bath_in_rbath"] == 2  # both fake spins lie within 65 Å of the centre
+    assert all(kw["method"] == "gcce" for kw in CALLS)
+
+
+def test_origin_site_kanai_rule():
+    """Kanai's centre sits at the CIF origin (load_crystal.m). Fractional sites copied from our E0 CIFs."""
+    a = 3.567
+    diamond = np.array([[.625, .625, .125], [.625, .125, .625], [.125, .625, .625], [.125, .125, .125],
+                        [.875, .875, .875], [.875, .375, .375], [.375, .875, .375], [.375, .375, .875]])
+    el, frac = pr.origin_site(np.eye(3) * a, diamond, ["C"] * 8)
+    assert el is None and np.allclose(frac, 0)  # bond centre, 0.77 Å from two C atoms
+    hexL = np.array([[3.0757, 0, 0], [-1.53785, 2.66364, 0], [0, 0, 10.0706]])
+    sic = np.array([[2/3, 1/3, .93784], [1/3, 2/3, .43784], [0, 0, .68789], [0, 0, .18789],
+                    [2/3, 1/3, .74980], [1/3, 2/3, .24980], [0, 0, .50046], [0, 0, .00046]])
+    el, frac = pr.origin_site(hexL, sic, ["Si"] * 4 + ["C"] * 4)
+    assert el == "C" and np.allclose(frac, [0, 0, .00046])  # C vacancy at the origin
+    # an atom just across the cell boundary (frac 0.9999) still counts as at the origin
+    assert pr.origin_site(np.eye(3) * 4, np.array([[0.9999, 0, 0]]), ["X"])[0] == "X"
+
+
+def test_origin_rule_without_removal(fake, monkeypatch, tmp_path):
+    fake({"": 1.0}, SI)
+    monkeypatch.setattr(pr, "_load_origin", lambda path: (None, [(None, np.zeros(3), 1)]))
+    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=2, site_rule="origin_kanai"), tmp_path / "out")
+    assert res["n_sites"] == 1 and res["sites"][0]["element"] == "" and np.isfinite(res["t2_ms"])
+    assert all(np.allclose(kw["position"], 0) for kw in CALLS)

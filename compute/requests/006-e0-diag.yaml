@@ -1,0 +1,46 @@
+# LAUNCHED S011 (2026-10-29) with Kian's OK. Results: results/cce/006-e0-diag/ or `python scripts/fetch_cce_results.py 006-e0-diag`.
+#
+# Purpose: find why diamond misses Kanai Table S1 (005: T2 0.746 ms, n 1.70 vs 0.97(12) ms, n 2.64(29))
+# while alpha-quartz gets the decay shape right (004 shard 1: n 2.73 vs 2.59(12); T2 2.96 vs 3.42(15) ms).
+# Uses the S011 runner diagnostics (per-config T2/n, NLS fit, mean curve, spins inside r_bath, PyCCE isotopes)
+# and per-item protocol overrides, one item per shard. Single ladder rung: convergence was already shown
+# (005: 50/15 -> 65/20 moved log10 T2 by 0.001), so `converged` reads False here by construction.
+#
+# Variants (all diamond unless noted), each changing one thing from diamond-base:
+#   diamond-base   B || [111], 50/15 A, CCE-2, method cce  -> reproduces 005 with diagnostics
+#   diamond-z      B || [001]                              -> field-direction effect
+#   diamond-rd8    r_dipole 8 A                            -> pair cut-off effect (PyCCE tutorial value)
+#   diamond-gcce   method gcce                             -> conventional vs generalised CCE
+#   diamond-cce3   order 3 with r_dipole 8 A               -> compare with diamond-rd8 (CCE-2 convergence)
+#   quartz-base    alpha-quartz, B || c, 50/15 A           -> curves + isotopes for the 13 % T2 gap
+#   *-origin       site_rule origin_kanai: centre at the CIF origin, atoms within 0.4 A erased, as in Kanai's
+#                  load_crystal.m (S011 finding). In MP's frames: diamond -> C-C bond centre (no vacancy),
+#                  4H-SiC -> C vacancy (C4 site), alpha-quartz -> empty point 1.9 A from O (no vacancy).
+#
+# Like-for-like target: Kanai's own averaged curves (figureS2_Hahn.csv) fitted with our fit_t2 give
+# diamond 0.868 ms (n 2.38), 4H-SiC 1.295 (2.68), alpha-quartz 3.289 (2.69); Table S1 is the mean of
+# per-configuration fits, which sits 4-18 % above the curve-average fit.
+id: 006-e0-diag
+mode: cce
+nshards: 9
+protocol:
+  central_spin: 0.5
+  b_field_T: 5.0
+  b_direction: [1.0, 1.0, 1.0]
+  order: 2
+  method: cce
+  ladder: [[50.0, 15.0]]
+  n_conf: 20
+  n_sites_max: 3
+  as_delay: false
+  seed: 0
+materials:
+  - {id: diamond-base, cif: compute/structures/e0/C_diamond_conventional.cif}
+  - {id: diamond-z, cif: compute/structures/e0/C_diamond_conventional.cif, protocol: {b_direction: [0.0, 0.0, 1.0]}}
+  - {id: diamond-rd8, cif: compute/structures/e0/C_diamond_conventional.cif, protocol: {ladder: [[50.0, 8.0]]}}
+  - {id: diamond-gcce, cif: compute/structures/e0/C_diamond_conventional.cif, protocol: {method: gcce}}
+  - {id: diamond-cce3, cif: compute/structures/e0/C_diamond_conventional.cif, protocol: {order: 3, ladder: [[50.0, 8.0]]}}
+  - {id: quartz-base, cif: compute/structures/e0/SiO2_alpha_quartz.cif, protocol: {b_direction: [0.0, 0.0, 1.0]}}
+  - {id: diamond-origin, cif: compute/structures/e0/C_diamond_conventional.cif, protocol: {site_rule: origin_kanai}}
+  - {id: sic-origin, cif: compute/structures/e0/SiC_4H.cif, protocol: {site_rule: origin_kanai, b_direction: [0.0, 0.0, 1.0]}}
+  - {id: quartz-origin, cif: compute/structures/e0/SiO2_alpha_quartz.cif, protocol: {site_rule: origin_kanai, b_direction: [0.0, 0.0, 1.0]}}
