@@ -11,6 +11,10 @@ Settings come from the T-005 literature read (S005; `literature/notes/kanai2022_
   `b_directions_lattice` of lattice-vector combinations of the CIF cell, which is the conventional
   cell (c, a+b, a+b+c = (0,0,1), (1,1,0), (1,1,1)); the host label is the log-mean over directions.
 - Bath-size cap (ADR-0004 item 5, S013): `max_bath_spins` shrinks r_bath for dense baths (see `cap_radii`).
+- Bath-size floor (T-066, S014): `min_bath_spins` grows r_bath (and the supercell) for ultra-dilute baths
+  until that many spins sit inside (see `floor_radii`); r_dipole grows by the same factor.
+- Fit guard (T-066, S014): fits with n outside `fit_n_range`, T2 outside the sampled window or too few usable
+  points become NaN (`guard_fit`), and a NaN in any site or direction makes the host label NaN (`label_ok`).
 - Convergence ladder over (r_bath, r_dipole) starting at Toriyama's screening values 50/15 Å.
 - Per site and ladder step, coherence curves are averaged over n_conf isotope configurations before
   the fit (Toriyama); the mean of per-configuration fits is also recorded (ADR-0004 decides).
@@ -41,6 +45,8 @@ class CCEProtocol:
     b_direction: tuple = (0.0, 0.0, 1.0)  # Cartesian; pymatgen puts the c axis along z
     b_directions_lattice: tuple | None = None  # e.g. ((0,0,1), (1,1,0), (1,1,1)); overrides b_direction
     max_bath_spins: int | None = None   # cap on spins inside r_bath (dense baths); None = no cap
+    min_bath_spins: int | None = None   # floor on spins inside r_bath (ultra-dilute baths); None = no floor
+    fit_n_range: tuple = (0.5, 6.0)     # accepted stretch exponents (fit guard)
     order: int = 2
     method: str = "cce"                 # PyCCE compute method: "cce" (conventional) or "gcce"
     ladder: tuple = ((50.0, 15.0), (65.0, 20.0), (80.0, 25.0))  # (r_bath, r_dipole) Å, climbed in order
@@ -179,6 +185,45 @@ def cap_radii(dist_A: np.ndarray, r_bath: float, r_dipole: float, cap: int | Non
     return r_new, float(r_dipole * r_new / r_bath), True
 
 
+def floor_radii(dist_A: np.ndarray, r_bath: float, r_dipole: float, floor: int | None,
+                r_safe: float) -> tuple[float, float, bool, float | None]:
+    """Bath-size floor (T-066), the mirror of `cap_radii`. dist_A: centre-to-spin distances (Å) of one
+    configuration; r_safe: radius (Å) inside which the generated supercell is complete. If fewer than `floor`
+    spins lie within r_bath, r_bath grows to just enclose the `floor` nearest spins and r_dipole grows by the
+    same factor (at least `floor` spins when several share the floor-th distance, as on a lattice shell).
+    Returns (r_bath, r_dipole, floored, r_needed): r_needed is None when the supercell is big
+    enough, else an estimate (Å, 20 % margin, from the spin density inside r_safe) of the radius to generate."""
+    d = np.sort(np.asarray(dist_A, float))
+    if floor is None or (d <= r_bath).sum() >= floor:
+        return float(r_bath), float(r_dipole), False, None
+    if (d <= r_safe).sum() > floor:
+        r_new = float(0.5 * (d[floor - 1] + d[floor]))
+        return r_new, float(r_dipole * r_new / r_bath), True, None
+    n_safe = max(int((d <= r_safe).sum()), 1)
+    return float(r_bath), float(r_dipole), False, float(r_safe * (1.2 * floor / n_safe) ** (1.0 / 3.0))
+
+
+# r_safe = SUPERCELL_SAFE x supercell size (Å). PyCCE's supercell (linear size about `supercell` Å) is centred on
+# cell 0 (007 early shards: 30 spins inside 50 Å of 513 in CaO's 200 Å supercell, as a centred cube predicts);
+# 0.4 stays inside the inscribed sphere of a hexagonal prism (0.433).
+SUPERCELL_SAFE = 0.4
+
+
+def guard_fit(t2: float, n: float, ts: np.ndarray, n_points: int, min_points: int,
+              n_range: tuple = (0.5, 6.0)) -> tuple[float, float, str]:
+    """Fit guard (T-066). Returns (T2_ms, n, "") for a usable fit, else (nan, nan, reason): too few points
+    with 0.05 < L < 0.95, a failed fit, n outside n_range, or T2 outside the sampled window [ts[1], ts[-1]] ms."""
+    if n_points < min_points:
+        return float("nan"), float("nan"), "few_points"
+    if not (np.isfinite(t2) and np.isfinite(n)):
+        return float("nan"), float("nan"), "fit_failed"
+    if not n_range[0] <= n <= n_range[1]:
+        return float("nan"), float("nan"), "n_out_of_range"
+    if not ts[1] <= t2 <= ts[-1]:
+        return float("nan"), float("nan"), "t2_outside_window"
+    return float(t2), float(n), ""
+
+
 def _center_position(cell, frac: np.ndarray) -> np.ndarray:
     """Cartesian position (Å) of a cell-0 site. PyCCE stores lattice vectors as columns of cell.cell."""
     if hasattr(cell, "to_cartesian"):
@@ -218,16 +263,32 @@ def _site_step(pc, cell, element, frac, r_bath, r_dipole, proto, ts=None, b_unit
     Baths are generated one at a time (dense baths are large); the bath-size cap is set from config 1."""
     pos = _center_position(cell, frac)
     remove = [(element, list(frac))] if element else None  # None: centre on an empty point, nothing erased
+    size = proto.supercell
 
     def bath(k):
-        return cell.gen_supercell(proto.supercell, remove=remove, seed=proto.seed + 1 + k)
+        return cell.gen_supercell(size, remove=remove, seed=proto.seed + 1 + k)
+
+    def distances(b):
+        xyz = np.asarray(getattr(b, "xyz", np.empty((0, 3))), float).reshape(-1, 3)
+        return xyz, np.linalg.norm(xyz - pos, axis=1)
 
     b0 = bath(0)
-    xyz = np.asarray(getattr(b0, "xyz", np.empty((0, 3))), float).reshape(-1, 3)
-    dist = np.linalg.norm(xyz - pos, axis=1)
+    xyz, dist = distances(b0)
     n_nominal = int((dist <= r_bath).sum())
     r_bath_set, r_dipole_set = r_bath, r_dipole
     r_bath, r_dipole, capped = cap_radii(dist, r_bath, r_dipole, proto.max_bath_spins)
+    floored = False
+    for _ in range(4):  # grow the supercell until the floor fits inside it (T-066)
+        r_b, r_d, floored, r_need = floor_radii(dist, r_bath, r_dipole, proto.min_bath_spins, SUPERCELL_SAFE * size)
+        if r_need is None:
+            r_bath, r_dipole = r_b, r_d
+            break
+        size = int(np.ceil(r_need / SUPERCELL_SAFE))
+        del b0
+        b0 = bath(0)
+        xyz, dist = distances(b0)
+    else:
+        raise RuntimeError(f"bath floor {proto.min_bath_spins} not reached with supercell {size} A")
 
     def coh(b, t):
         return _coherence(pc, b, pos, t, r_bath, r_dipole, proto, b_unit)
@@ -243,15 +304,19 @@ def _site_step(pc, cell, element, frac, r_bath, r_dipole, proto, ts=None, b_unit
     curves += [coh(bath(k), ts) for k in range(1, proto.n_conf)]
     curves = np.array(curves)
     mean_curve = curves.mean(axis=0)
-    t2_avg, n_avg = fit_t2(ts, mean_curve)
-    t2_nls, n_nls = fit_t2_nls(ts, mean_curve)
-    fits = np.array([fit_t2(ts, c) for c in curves], float).reshape(-1, 2)
+    npts, rng = n_fit_points(mean_curve), proto.fit_n_range
+    t2_avg, n_avg, flag = guard_fit(*fit_t2(ts, mean_curve), ts, npts, proto.min_fit_points, rng)
+    t2_nls, n_nls, _ = guard_fit(*fit_t2_nls(ts, mean_curve), ts, npts, proto.min_fit_points, rng)
+    fits = np.array([guard_fit(*fit_t2(ts, c), ts, n_fit_points(c), 3, rng)[:2] for c in curves],
+                    float).reshape(-1, 2)
     per = fits[:, 0]
     ok = per[np.isfinite(per)]
-    return {"t2_ms": t2_avg, "stretch_n": n_avg, "t2_ms_nls": t2_nls, "stretch_n_nls": n_nls,
+    return {"t2_ms": t2_avg, "stretch_n": n_avg, "fit_flag": flag, "n_fit_points": npts,
+            "t2_ms_nls": t2_nls, "stretch_n_nls": n_nls,
             "per_conf_t2_ms": per.tolist(), "per_conf_n": fits[:, 1].tolist(),
             "n_bath_in_rbath": int((dist <= r_bath).sum()), "n_bath_in_rbath_nominal": n_nominal,
-            "capped": capped, "r_bath_used_A": r_bath, "r_dipole_used_A": r_dipole,
+            "capped": capped, "floored": floored, "supercell_used": size,
+            "r_bath_used_A": r_bath, "r_dipole_used_A": r_dipole,
             "r_bath_set_A": r_bath_set, "r_dipole_set_A": r_dipole_set,
             "curve_t_ms": ts.tolist(), "curve_mean": mean_curve.tolist(),
             "t2_ms_mean_of_fits": float(ok.mean()) if len(ok) else float("nan"),
@@ -319,12 +384,13 @@ def run_material(structure_path: str | Path, proto: CCEProtocol, out_dir: str | 
     w = np.array([s["multiplicity"] for s in per_site], float)
     t2s = np.array([s["final"]["t2_ms"] for s in per_site], float)
     good = np.isfinite(t2s) & (t2s > 0)
-    t2 = _log_mean(t2s, w)
+    t2 = _log_mean(t2s, w, strict=True)  # T-066: one guarded (NaN) site or direction voids the label
     res = {
         "structure": Path(structure_path).name, "protocol": asdict(proto), "protocol_hash": protocol_hash(proto),
         "t2_ms": t2, "log10_t2_ms": float(np.log10(t2)) if np.isfinite(t2) else float("nan"),
         "site_spread_log10": float(np.ptp(np.log10(t2s[good]))) if good.sum() > 1 else 0.0,
         "converged": bool(good.all() and all(s["converged"] for s in per_site)),
+        "label_ok": bool(np.isfinite(t2)),
         "n_sites": len(per_site), "sites": per_site, "wall_s": round(time.time() - t0, 2),
         "isotopes": _isotopes(cell, pc, _symbols(atoms)),
     }
@@ -341,11 +407,14 @@ def run_material(structure_path: str | Path, proto: CCEProtocol, out_dir: str | 
     return res
 
 
-def _log_mean(t2: np.ndarray, w: np.ndarray | None = None) -> float:
-    """Weighted log-mean (ms) of the positive finite T2 values (ms); NaN if there are none."""
+def _log_mean(t2: np.ndarray, w: np.ndarray | None = None, strict: bool = False) -> float:
+    """Weighted log-mean (ms) of the positive finite T2 values (ms); NaN if there are none, or, with
+    strict=True, if any value is not positive and finite."""
     t2 = np.asarray(t2, float)
     w = np.ones_like(t2) if w is None else np.asarray(w, float)
     good = np.isfinite(t2) & (t2 > 0)
+    if strict and not good.all():
+        return float("nan")
     return float(10 ** np.average(np.log10(t2[good]), weights=w[good])) if good.any() else float("nan")
 
 
@@ -356,7 +425,7 @@ def _combine_directions(recs: list[dict]) -> dict:
     t2 = np.array([f["t2_ms"] for f in fin], float)
     good = np.isfinite(t2) & (t2 > 0)
     return {"directions": recs, "converged": all(r["converged"] for r in recs),
-            "final": {"t2_ms": _log_mean(t2),
+            "final": {"t2_ms": _log_mean(t2, strict=True),
                       "t2_ms_mean_of_fits": _log_mean(np.array([f["t2_ms_mean_of_fits"] for f in fin], float)),
                       "stretch_n": float(np.nanmean([f["stretch_n"] for f in fin])),
                       "direction_t2_ms": t2.tolist(),

@@ -1,0 +1,45 @@
+# LAUNCHED S015 with Kian's OK (Q13 yes). Drafted S014 (T-066).
+# Results: results/cce/008-e0b-dilute/ via `python scripts/fetch_cce_results.py 008-e0b-dilute`.
+#
+# Purpose: re-run the two ultra-dilute Kanai Table S1 hosts that 007-e0b could not label (CaO, CeO2), with the
+# T-066 bath-size floor and fit guard (src/qkhosts/labels/pycce_runner.py: floor_radii, guard_fit, label_ok).
+# In 007 (results/cce/007-e0b-early/) only 30 (CaO) and 9 (CeO2) spins sat inside r_bath = 50 Å; the fits failed
+# or were meaningless (CeO2 n ~ 0, T2 1e-116..1e149 ms). Acceptance (T-066): fits with n in [0.5, 6] and label_ok.
+#
+# Protocol: as 007 (ADR-0004 proposed + option A: S = 1/2, 5 T, Hahn echo, as_delay false, CCE-2 `cce`, single rung
+# 50/15 Å, 20 configurations, single_most_spinful site, field along c, a+b, a+b+c of the conventional cell,
+# cap 1,500) plus `min_bath_spins: 1000` (Kanai's "~1,000 interacting nuclear spins"): r_bath grows to enclose
+# 1,000 spins and r_dipole grows by the same factor (pairs per spin as in a 50/15 Å dilute bath).
+# Floor convergence on CaO, B || c: floors 500 / 1,000 / 2,000 (the 1,000 point is cao-A's c direction).
+#
+# Expected radii (from 007's spin counts inside 50 Å, scaled as N^(1/3); estimates, the run records the real ones):
+# CaO 1,000 spins -> r_bath ~161 Å, r_dipole ~48 Å; 500 -> ~128/38; 2,000 -> ~203/61. CeO2 1,000 -> ~240/72 Å.
+# Supercell: the runner grows it until 0.4 x supercell >= r_bath (SUPERCELL_SAFE); it is set here near that size
+# so the first bath is already big enough (CaO 450 Å, CaO floor 2,000: 560 Å, CeO2 650 Å). A 650 Å CeO2 supercell
+# holds about 2e7 lattice sites; memory on a 16 GB runner is the risk to watch (the shard then fails alone).
+# Cost: pairs per spin as at 50/15 Å, so about the dilute E0 cost (diamond 134-159 s per direction in 007) plus bath
+# generation; one host x 3 directions per shard.
+# Targets, Kanai Table S1 (SI p. 20; T2 Hahn ms, n): CaO 37.2(71) 2.84; CeO2 53.5(13) 2.80.
+id: 008-e0b-dilute
+mode: cce
+nshards: 4
+protocol:
+  central_spin: 0.5
+  b_field_T: 5.0
+  b_directions_lattice: [[0, 0, 1], [1, 1, 0], [1, 1, 1]]
+  site_rule: single_most_spinful
+  max_bath_spins: 1500
+  min_bath_spins: 1000
+  order: 2
+  method: cce
+  ladder: [[50.0, 15.0]]
+  n_conf: 20
+  as_delay: false
+  seed: 0
+materials:
+  - {id: cao-A, cif: compute/structures/e0b/CaO_rocksalt_conventional.cif, protocol: {supercell: 450}}
+  - {id: ceo2-A, cif: compute/structures/e0b/CeO2_fluorite_conventional.cif, protocol: {supercell: 650}}
+  - {id: cao-c-floor500, cif: compute/structures/e0b/CaO_rocksalt_conventional.cif,
+     protocol: {b_directions_lattice: [[0, 0, 1]], min_bath_spins: 500, supercell: 450}}
+  - {id: cao-c-floor2000, cif: compute/structures/e0b/CaO_rocksalt_conventional.cif,
+     protocol: {b_directions_lattice: [[0, 0, 1]], min_bath_spins: 2000, supercell: 560}}

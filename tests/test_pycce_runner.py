@@ -343,3 +343,131 @@ def test_single_site_rule_refuses_without_abundances(fake, monkeypatch, tmp_path
     fake({"Si": 1.0}, SI)  # the fake PyCCE has no common_concentrations
     with pytest.raises(RuntimeError, match="spinful"):
         run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1, site_rule="single_most_spinful"), tmp_path / "out")
+
+
+# --- S014 (T-066): bath-size floor for ultra-dilute baths, fit guard, strict host label ---
+
+def test_guard_fit_reasons():
+    ts = np.linspace(0.0, 10.0, 101)
+    assert pr.guard_fit(2.0, 2.5, ts, 40, 15) == (2.0, 2.5, "")
+    assert pr.guard_fit(2.0, 2.5, ts, 10, 15)[2] == "few_points"
+    assert pr.guard_fit(float("nan"), 2.5, ts, 40, 15)[2] == "fit_failed"
+    assert pr.guard_fit(2.0, 0.3, ts, 40, 15)[2] == "n_out_of_range"
+    assert pr.guard_fit(2.0, -0.01, ts, 40, 15)[2] == "n_out_of_range"   # CeO2 007 early shard
+    assert pr.guard_fit(6.9e149, 0.9, ts, 40, 15)[2] == "t2_outside_window"
+    assert pr.guard_fit(1e-3, 0.9, ts, 40, 15)[2] == "t2_outside_window"
+    t2, n, flag = pr.guard_fit(2.0, 7.0, ts, 40, 15)
+    assert np.isnan(t2) and np.isnan(n) and flag == "n_out_of_range"
+
+
+def test_floor_radii():
+    d = np.arange(1, 101, dtype=float)  # spins at 1, 2, ..., 100 Å
+    assert pr.floor_radii(d, 50.0, 15.0, None, 90.0) == (50.0, 15.0, False, None)
+    assert pr.floor_radii(d, 50.0, 15.0, 40, 90.0) == (50.0, 15.0, False, None)  # 50 inside, above the floor
+    rb, rd, floored, need = pr.floor_radii(d, 50.0, 15.0, 70, 90.0)
+    assert floored and need is None and rb == pytest.approx(70.5) and rd == pytest.approx(15.0 * 70.5 / 50.0)
+    assert (d <= rb).sum() == 70
+    rb, rd, floored, need = pr.floor_radii(d, 50.0, 15.0, 70, 60.0)  # only 60 spins inside the safe radius
+    assert not floored and (rb, rd) == (50.0, 15.0) and need == pytest.approx(60.0 * (1.2 * 70 / 60) ** (1 / 3))
+
+
+class GridBath(FakeBath):
+    """Ultra-dilute fake bath: one spin per (10 Å)^3, uniform in the cube of side `size` Å around 0 (random
+    positions, so no two spins share a distance from the centre)."""
+    def __init__(self, seed, removed, size):
+        super().__init__(seed, removed)
+        rng = np.random.default_rng(seed)
+        self.xyz = rng.uniform(-size / 2, size / 2, (int(size ** 3 / 1000), 3))
+
+
+def _install_grid(monkeypatch):
+    CALLS.clear()
+    fk = make_fake({"Si": 1.0})
+    sizes = []
+
+    class GridCell(FakeCell):
+        def gen_supercell(self, size, remove=None, seed=None):
+            sizes.append(size)
+            return GridBath(seed, remove[0][0], size)
+
+    fk.read_ase = lambda atoms: GridCell()
+    monkeypatch.setitem(sys.modules, "pycce", fk)
+    monkeypatch.setattr(pr, "_load_sites", lambda path, n: (None, SI))
+    return sizes
+
+
+def test_bath_floor_in_runner(monkeypatch, tmp_path):
+    """Too few spins inside r_bath: r_bath grows to enclose the floor and r_dipole grows with it."""
+    _install_grid(monkeypatch)
+    proto = CCEProtocol(n_conf=2, ladder=((20.0, 6.0),), min_bath_spins=100)
+    st = run_material(tmp_path / "x.cif", proto, tmp_path / "out")["sites"][0]["final"]
+    assert st["floored"] and not st["capped"] and st["supercell_used"] == 200
+    assert st["n_bath_in_rbath_nominal"] < 100 and st["n_bath_in_rbath"] == 100
+    assert st["r_bath_used_A"] > 20.0 and st["r_dipole_used_A"] == pytest.approx(6.0 * st["r_bath_used_A"] / 20.0)
+    assert all(kw["r_bath"] == pytest.approx(st["r_bath_used_A"]) for kw in CALLS)
+
+
+def test_bath_floor_grows_supercell(monkeypatch, tmp_path):
+    """The floor does not fit inside the requested supercell: it is regenerated larger for every configuration."""
+    sizes = _install_grid(monkeypatch)
+    proto = CCEProtocol(n_conf=3, ladder=((10.0, 3.0),), min_bath_spins=100, supercell=40)
+    st = run_material(tmp_path / "x.cif", proto, tmp_path / "out")["sites"][0]["final"]
+    assert st["floored"] and st["supercell_used"] > 40 and st["n_bath_in_rbath"] == 100
+    assert st["r_bath_used_A"] <= pr.SUPERCELL_SAFE * st["supercell_used"]
+    assert sizes[0] == 40 and set(sizes[1:]) == {st["supercell_used"]}
+
+
+def test_no_floor_by_default(monkeypatch, tmp_path):
+    _install_grid(monkeypatch)
+    st = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1, ladder=((20.0, 6.0),)),
+                      tmp_path / "out")["sites"][0]["final"]
+    assert not st["floored"] and st["r_bath_used_A"] == 20.0 and st["supercell_used"] == 200
+
+
+def test_fit_guard_voids_label(monkeypatch, tmp_path):
+    """A decay that is no stretched exponential in range (n = 0.2) gives NaN fits and a NaN, flagged label."""
+    CALLS.clear()
+
+    class Sim:
+        def __init__(self, **kw):
+            self.kw = kw
+
+        def compute(self, ts, method, quantity):
+            return np.exp(-(np.asarray(ts) / 1.0) ** 0.2)
+
+    monkeypatch.setitem(sys.modules, "pycce", types.SimpleNamespace(read_ase=lambda a: FakeCell(), Simulator=Sim))
+    monkeypatch.setattr(pr, "_load_sites", lambda path, n: (None, SI))
+    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=2, ladder=((50.0, 15.0),)), tmp_path / "out")
+    st = res["sites"][0]["final"]
+    assert st["fit_flag"] == "n_out_of_range" and np.isnan(st["t2_ms"]) and np.isnan(st["stretch_n"])
+    assert all(np.isnan(st["per_conf_t2_ms"])) and st["n_fit_failed"] == 2
+    assert np.isnan(res["t2_ms"]) and not res["label_ok"] and not res["converged"]
+    assert json.loads((tmp_path / "out" / "x.json").read_text(encoding="utf-8"))["label_ok"] is False
+
+
+def test_one_bad_direction_voids_label(monkeypatch, tmp_path):
+    """Before T-066 the log-mean silently skipped bad directions; now one NaN direction voids the label."""
+    CALLS.clear()
+
+    class Sim:
+        def __init__(self, **kw):
+            self.kw = kw
+
+        def compute(self, ts, method, quantity):
+            b = np.asarray(self.kw["magnetic_field"], float)
+            n = 0.2 if abs(b[2]) > 0.99 * np.linalg.norm(b) else 2.0  # only B || c decays badly
+            return np.exp(-(np.asarray(ts) / 1.0) ** n)
+
+    monkeypatch.setitem(sys.modules, "pycce", types.SimpleNamespace(read_ase=lambda a: FakeCell(), Simulator=Sim))
+    monkeypatch.setattr(pr, "_load_sites", lambda path, n: (None, SI))
+    proto = CCEProtocol(n_conf=1, ladder=((50.0, 15.0),), b_directions_lattice=DIRS)
+    res = run_material(tmp_path / "x.cif", proto, tmp_path / "out")
+    d = res["direction_t2_ms"]
+    assert np.isnan(d[0]) and d[1] == pytest.approx(1.0, rel=1e-2) and d[2] == pytest.approx(1.0, rel=1e-2)
+    assert np.isnan(res["sites"][0]["final"]["t2_ms"]) and np.isnan(res["t2_ms"]) and not res["label_ok"]
+
+
+def test_good_label_is_ok(fake, tmp_path):
+    fake({"Si": 1.0}, SI)
+    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=2), tmp_path / "out")
+    assert res["label_ok"] and res["sites"][0]["final"]["fit_flag"] == ""
