@@ -67,11 +67,19 @@ def cell_family(lattice: np.ndarray, tol_len: float = 1e-3, tol_deg: float = 0.0
 def conventional_cubic(lattice: np.ndarray, cart: np.ndarray, species: list[str],
                        max_index: int = 1) -> tuple[np.ndarray, np.ndarray, list[str]]:
     """Convert a primitive cell of a cubic lattice (fcc, bcc, sc) into a conventional cubic cell.
+    See `conventional_cell`."""
+    return conventional_cell(lattice, cart, species, "cubic", max_index)
 
-    Searches integer matrices M (entries in [-max_index, max_index], det > 0) for new rows M @ L that
-    are mutually orthogonal with equal lengths, picks the smallest such cell, and fills it with the
-    lattice-translated images of the input sites. Returns (lattice rows Å, Cartesian Å, species).
-    Raises ValueError if no cubic supercell is found."""
+
+def conventional_cell(lattice: np.ndarray, cart: np.ndarray, species: list[str], family: str = "cubic",
+                      max_index: int = 1) -> tuple[np.ndarray, np.ndarray, list[str]]:
+    """Convert a primitive cell into the smallest supercell of the given `cell_family` ('cubic' for fcc,
+    bcc, sc; 'hexagonal' for a rhombohedral primitive cell, e.g. corundum, giving the 3x hexagonal
+    setting with c along the 3-fold axis).
+
+    Searches integer matrices M (entries in [-max_index, max_index], det > 0) for new rows M @ L of that
+    family, picks the smallest such cell, and fills it with the lattice-translated images of the input
+    sites. Returns (lattice rows Å, Cartesian Å, species). Raises ValueError if none is found."""
     L = np.asarray(lattice, float)
     cart = np.asarray(cart, float)
     rng = range(-max_index, max_index + 1)
@@ -81,10 +89,10 @@ def conventional_cubic(lattice: np.ndarray, cart: np.ndarray, species: list[str]
         det = round(float(np.linalg.det(M)))
         if det <= 0 or (best is not None and det >= best[0]):
             continue
-        if cell_family(M @ L) == "cubic":
+        if cell_family(M @ L) == family:
             best = (det, M)
     if best is None:
-        raise ValueError("no conventional cubic cell found")
+        raise ValueError(f"no conventional {family} cell found")
     det, M = best
     C = M @ L
     # images: shifts n of the old lattice that land inside the new cell (|n| <= det suffices)
@@ -99,7 +107,7 @@ def conventional_cubic(lattice: np.ndarray, cart: np.ndarray, species: list[str]
             spc.append(species[i])
     pos = np.asarray(pos)
     if len(pos) != det * len(cart):
-        raise ValueError(f"expected {det * len(cart)} sites in the cubic cell, got {len(pos)}")
+        raise ValueError(f"expected {det * len(cart)} sites in the {family} cell, got {len(pos)}")
     return C, pos, spc
 
 

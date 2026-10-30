@@ -78,12 +78,29 @@ def test_stored_raw_matches_sums_and_rebuilds_cifs():
     sums = dict(reversed(ln.split()) for ln in (RAW / "SHA256SUMS").read_text(encoding="utf-8").splitlines())
     for name, digest in sums.items():
         assert hashlib.sha256((RAW / name).read_bytes()).hexdigest() == digest, name
-    sources = json.loads((E0 / "SOURCES.json").read_text(encoding="utf-8"))
-    for cif_name, src in sources.items():
-        cif = (E0 / cif_name).read_bytes()
-        assert hashlib.sha256(cif).hexdigest() == src["cif_sha256"], cif_name
-        resp = json.loads((RAW / f"{src['mp_id']}.json").read_text(encoding="utf-8"))
-        L, cart, spc = om.entry_arrays(resp)
-        if src["cell_family"] == "cubic" and om.cell_family(L) != "cubic":
-            L, cart, spc = om.conventional_cubic(L, cart, spc)
-        assert om.cell_family(L) == src["cell_family"] and len(spc) == src["n_sites_cif"]
+    for folder in (E0, E0.parent / "e0b"):
+        sources = json.loads((folder / "SOURCES.json").read_text(encoding="utf-8"))
+        for cif_name, src in sources.items():
+            cif = (folder / cif_name).read_bytes()
+            assert hashlib.sha256(cif).hexdigest() == src["cif_sha256"], cif_name
+            resp = json.loads((RAW / f"{src['mp_id']}.json").read_text(encoding="utf-8"))
+            L, cart, spc = om.entry_arrays(resp)
+            if om.cell_family(L) != src["cell_family"]:
+                L, cart, spc = om.conventional_cell(L, cart, spc, src["cell_family"])
+            assert om.cell_family(L) == src["cell_family"] and len(spc) == src["n_sites_cif"]
+
+
+def test_conventional_hexagonal_from_rhombohedral():
+    """S013: a rhombohedral primitive cell (corundum-like, a_r = 5.18 Å, alpha = 55.3°) becomes the 3x
+    hexagonal setting with c along the 3-fold axis (the rhombohedral body diagonal)."""
+    a_r, alpha = 5.178, np.radians(55.29)
+    c_ = (np.cos(alpha) - np.cos(alpha) ** 2) / np.sin(alpha)
+    L = a_r * np.array([[1, 0, 0], [np.cos(alpha), np.sin(alpha), 0],
+                        [np.cos(alpha), c_, np.sqrt(1 - np.cos(alpha) ** 2 - c_ ** 2)]])
+    cart = np.array([[0, 0, 0], (L[0] + L[1] + L[2]) * 0.35])
+    H, pos, s = om.conventional_cell(L, cart, ["Al", "Al"], "hexagonal")
+    a, b, c, *_ = om.cell_parameters(H)
+    assert om.cell_family(H) == "hexagonal" and len(pos) == 6 and s == ["Al"] * 6
+    assert abs(np.linalg.det(H)) == pytest.approx(3 * abs(np.linalg.det(L)))
+    np.testing.assert_allclose(abs(H[2] @ (L[0] + L[1] + L[2])) / c / np.linalg.norm(L.sum(0)), 1.0, atol=1e-9)
+    assert a == pytest.approx(a_r * np.sqrt(2 - 2 * np.cos(alpha)))  # a_h = |a1 - a2|

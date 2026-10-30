@@ -1,0 +1,70 @@
+# LAUNCHED S013 (2026-10-30) with Kian's OK (Q12; moved from compute/drafts/).
+# Results: results/cce/007-e0b/ via `python scripts/fetch_cce_results.py 007-e0b` (local gh path, within 7 days).
+#
+# Purpose: E0b (T-065), the last check before ADR-0004 is accepted, at the ADR-0004 protocol with option A (Q11, S012):
+#   (a) field-direction spread on 4H-SiC, alpha-quartz and diamond (diamond adds [110] to 006's [001]/[111]);
+#   (b) the 5 remaining Kanai Table S1 hosts, to test whether our offset from Table S1 is uniform
+#       (E0: diamond [001] 1.02, 4H-SiC 0.91, quartz 0.87 of Table S1, mean-of-fits);
+#   (c) one dense-bath host, alpha-Al2O3 (27Al 100 %, I = 5/2), with the bath-size cap, for the worst-case cost
+#       and for cap convergence (750 / 1,500 / 3,000 spins).
+#   The PyCCE isotope record of every host is compared with Kanai's isotopetable.csv (ADR-0004 item 8).
+#
+# Protocol (ADR-0004 proposed + option A): S = 1/2, 5 T, Hahn echo, as_delay false, CCE-2 `cce`, single rung
+# 50/15 Å (so `converged` reads False by construction, as in 006), 20 configurations, one vacancy site by the
+# single_most_spinful rule (pick_site), field along c, a+b, a+b+c of the conventional cell (every CIF here is the
+# conventional cell: compute/structures/e0, e0b). Cap: max_bath_spins 1500 for all items; when more spins sit
+# inside 50 Å, r_bath shrinks to enclose 1,500 and r_dipole shrinks by the same factor (cap_radii).
+#
+# Targets, Kanai Table S1 (SI p. 20; T2 Hahn ms, n): diamond 0.97(12) 2.64; 4H-SiC 1.35(9) 2.80; Si 1.24(23) 2.30;
+# CeO2 53.5(13) 2.80; CaO 37.2(71) 2.84; alpha-quartz 3.42(15) 2.59; ZnO 2.33(28) 3.21; MgO 0.90(8) 2.84.
+# Kanai's field direction is [111] for diamond and [001] otherwise (Fig. 2A); option A's c direction is the
+# like-for-like one for the 7 non-diamond hosts.
+#
+# Expected bath sizes inside 50 Å (rough, from density x abundance; the run records n_bath_in_rbath_nominal):
+# SiC 1,433 (E0), Si ~1,200, ZnO ~900 (67Zn, I = 5/2), MgO ~2,800 (25Mg, I = 5/2 -> capped near 41 Å / 12 Å),
+# CaO ~25, CeO2 ~10, Al2O3 ~25,000 (capped near 20 Å / 6 Å).
+#
+# Sharding: one item per shard (15 jobs; <= 20 run at once). Cost per site and direction in E0: 64-319 s (dilute, S = 1/2 pairs of
+# I = 1/2). I = 5/2 baths (ZnO, MgO, Al2O3) are untested, so each of their directions is its own item, which keeps
+# every shard well inside the 355 min job limit even at 10x the dilute cost; the label is then the log-mean of the
+# 3 items. Al2O3 uses n_conf 5: its bath is 100 % 27Al, so configurations differ only in the 0.038 % 17O spins
+# (cost per configuration is recorded, so 20-configuration cost = 4x). t_max_ms 2 for Al2O3 saves window retries.
+# Risk: cap 3,000 has about 2x the spins and 2x the neighbours per spin of cap 1,500 (~4x cost). If it hits the
+# job limit, that shard writes no record (the other shards are unaffected) and the timeout itself is the answer.
+id: 007-e0b
+mode: cce
+nshards: 15
+protocol:
+  central_spin: 0.5
+  b_field_T: 5.0
+  b_directions_lattice: [[0, 0, 1], [1, 1, 0], [1, 1, 1]]
+  site_rule: single_most_spinful
+  max_bath_spins: 1500
+  order: 2
+  method: cce
+  ladder: [[50.0, 15.0]]
+  n_conf: 20
+  as_delay: false
+  seed: 0
+materials:
+  # (a) direction spread, hosts from E0
+  - {id: sic-A, cif: compute/structures/e0/SiC_4H.cif}
+  - {id: quartz-A, cif: compute/structures/e0/SiO2_alpha_quartz.cif}
+  - {id: diamond-A, cif: compute/structures/e0/C_diamond_conventional.cif}
+  # (b) the other 5 Table S1 hosts
+  - {id: si-A, cif: compute/structures/e0b/Si_diamond_conventional.cif}
+  - {id: cao-A, cif: compute/structures/e0b/CaO_rocksalt_conventional.cif}
+  - {id: ceo2-A, cif: compute/structures/e0b/CeO2_fluorite_conventional.cif}
+  - {id: zno-c, cif: compute/structures/e0b/ZnO_wurtzite.cif, protocol: {b_directions_lattice: [[0, 0, 1]]}}
+  - {id: zno-ab, cif: compute/structures/e0b/ZnO_wurtzite.cif, protocol: {b_directions_lattice: [[1, 1, 0]]}}
+  - {id: zno-abc, cif: compute/structures/e0b/ZnO_wurtzite.cif, protocol: {b_directions_lattice: [[1, 1, 1]]}}
+  - {id: mgo-c, cif: compute/structures/e0b/MgO_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[0, 0, 1]]}}
+  - {id: mgo-ab, cif: compute/structures/e0b/MgO_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 0]]}}
+  - {id: mgo-abc, cif: compute/structures/e0b/MgO_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 1]]}}
+  # (c) dense bath, c direction only: cap convergence 750 / 1,500 / 3,000 spins (directions follow if the cost allows)
+  - {id: al2o3-c-cap750, cif: compute/structures/e0b/Al2O3_corundum_hexagonal.cif,
+     protocol: {b_directions_lattice: [[0, 0, 1]], n_conf: 5, t_max_ms: 2.0, max_bath_spins: 750}}
+  - {id: al2o3-c-cap1500, cif: compute/structures/e0b/Al2O3_corundum_hexagonal.cif,
+     protocol: {b_directions_lattice: [[0, 0, 1]], n_conf: 5, t_max_ms: 2.0}}
+  - {id: al2o3-c-cap3000, cif: compute/structures/e0b/Al2O3_corundum_hexagonal.cif,
+     protocol: {b_directions_lattice: [[0, 0, 1]], n_conf: 5, t_max_ms: 2.0, max_bath_spins: 3000}}

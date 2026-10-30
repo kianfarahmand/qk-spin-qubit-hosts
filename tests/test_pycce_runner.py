@@ -186,3 +186,160 @@ def test_origin_rule_without_removal(fake, monkeypatch, tmp_path):
     res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=2, site_rule="origin_kanai"), tmp_path / "out")
     assert res["n_sites"] == 1 and res["sites"][0]["element"] == "" and np.isfinite(res["t2_ms"])
     assert all(np.allclose(kw["position"], 0) for kw in CALLS)
+
+
+def test_isotopes_fall_back_to_common_concentrations():
+    """cell.isotopes is {} unless isotopes were added (006-e0-diag); the record must then come from
+    PyCCE's natural-abundance table, restricted to the host's elements."""
+    cell = types.SimpleNamespace(isotopes={})
+    common = {"C": {"13C": 0.0107}, "O": {"17O": 0.00038}, "Si": {"29Si": 0.04685}}
+    pc = types.SimpleNamespace(common_concentrations=common)
+    assert pr._isotopes(cell, pc, ["Si", "C", "C"]) == {"C": {"13C": 0.0107}, "Si": {"29Si": 0.04685}}
+    pc_nested = types.SimpleNamespace(bath=types.SimpleNamespace(common_concentrations=common))
+    assert pr._isotopes(cell, pc_nested, ["O"]) == {"O": {"17O": 0.00038}}
+    assert pr._isotopes(cell) is None
+    added = types.SimpleNamespace(isotopes={"C": {"13C": 0.5}})
+    assert pr._isotopes(added, pc, ["C"]) == {"C": {"13C": 0.5}}
+
+
+# --- S013 (T-065, ADR-0004 option A): field-direction list, single-site rule, bath-size cap ---
+
+def make_dir_fake(t2_by_axis):
+    """Fake whose T2 depends on the field direction: T2 = sum_i t2_by_axis[i] * b_i^2 (b a unit vector)."""
+    class Sim:
+        def __init__(self, **kw):
+            self.kw = kw
+            CALLS.append(kw)
+
+        def compute(self, ts, method, quantity):
+            b = np.asarray(self.kw["magnetic_field"], float)
+            b = b / np.linalg.norm(b)
+            t2 = float(np.dot(t2_by_axis, b ** 2))
+            return np.exp(-(np.asarray(ts) / t2) ** 2)
+
+    return types.SimpleNamespace(read_ase=lambda atoms: FakeCell(), Simulator=Sim)
+
+
+DIRS = ((0, 0, 1), (1, 1, 0), (1, 1, 1))
+
+
+def test_direction_list_log_mean(monkeypatch, tmp_path):
+    CALLS.clear()
+    monkeypatch.setitem(sys.modules, "pycce", make_dir_fake([1.0, 2.0, 4.0]))
+    monkeypatch.setattr(pr, "_load_sites", lambda path, n: (None, SI))
+    proto = CCEProtocol(n_conf=2, ladder=((50.0, 15.0),), b_directions_lattice=DIRS)
+    res = run_material(tmp_path / "x.cif", proto, tmp_path / "out")
+    # FakeCell is cubic: c -> z (T2 4), a+b -> (x+y)/sqrt2 (T2 1.5), a+b+c (T2 7/3)
+    expect = [4.0, 1.5, 7 / 3]
+    assert res["n_directions"] == 3
+    assert res["direction_t2_ms"] == pytest.approx(expect, rel=1e-3)
+    assert res["t2_ms"] == pytest.approx(np.prod(expect) ** (1 / 3), rel=1e-3)
+    assert res["direction_spread_log10"] == pytest.approx(np.log10(4.0 / 1.5), rel=1e-3)
+    site = res["sites"][0]
+    assert [d["b_lattice"] for d in site["directions"]] == [list(map(float, d)) for d in DIRS]
+    assert np.allclose(site["directions"][1]["b_cart_unit"], np.array([1, 1, 0]) / np.sqrt(2))
+    assert site["final"]["t2_ms"] == pytest.approx(res["t2_ms"])
+    # every direction reaches the simulator at 5 T, with the same isotope seeds
+    fields = {tuple(np.round(kw["magnetic_field"], 6)) for kw in CALLS}
+    assert len(fields) == 3 and all(np.linalg.norm(f) == pytest.approx(5e4) for f in fields)
+    seeds = {}
+    for kw in CALLS:
+        seeds.setdefault(tuple(np.round(kw["magnetic_field"], 6)), set()).add(kw["bath"].seed)
+    assert all(s == {1, 2} for s in seeds.values())
+
+
+def test_single_direction_keeps_legacy_layout(fake, tmp_path):
+    fake({"Si": 1.0}, SI)
+    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1), tmp_path / "out")
+    site = res["sites"][0]
+    assert "directions" not in site and "ladder" in site and site["b_lattice"] is None
+    assert "n_directions" not in res and "spinful_fraction" not in res
+
+
+def test_field_directions_use_lattice_columns():
+    hexcell = types.SimpleNamespace(cell=np.array([[3.0, -1.5, 0.0], [0.0, 1.5 * np.sqrt(3), 0.0], [0.0, 0.0, 10.0]]))
+    d = pr.field_directions(hexcell, CCEProtocol(b_directions_lattice=DIRS))
+    assert np.allclose(d[0][1], [0, 0, 1])
+    assert np.allclose(d[1][1], [0.5, np.sqrt(3) / 2, 0])  # a + b of a hexagonal cell, 60° from a
+    assert d[2][1][2] > 0.9  # a + b + c leans towards c for c/a = 3.33
+    assert pr.field_directions(hexcell, CCEProtocol())[0][0] is None
+
+
+def test_pick_site_rule():
+    # Al2O3-like: Al (mult 12, 100 % 27Al) beats O (mult 18, 0.038 % 17O)
+    sites = [("O", np.zeros(3), 18), ("Al", np.ones(3) * 0.35, 12)]
+    assert pr.pick_site(sites, {"Al": 1.0, "O": 0.00038})[0] == "Al"
+    # SiO2: Si (3 x 4.7 %) beats O (6 x 0.038 %)
+    assert pr.pick_site([("O", np.zeros(3), 6), ("Si", np.zeros(3), 3)], {"Si": 0.0468, "O": 0.00038})[0] == "Si"
+    # within the element, the highest multiplicity; ties go to the first in structure order
+    a, b, c = ("C", np.zeros(3), 2), ("C", np.ones(3) * .5, 4), ("C", np.ones(3) * .25, 4)
+    assert pr.pick_site([a, b, c], {"C": 0.0107}) is b
+    # element tie: first element in structure order
+    assert pr.pick_site([("Si", np.zeros(3), 4), ("C", np.zeros(3), 4)], {"Si": 0.01, "C": 0.01})[0] == "Si"
+
+
+def test_single_most_spinful_in_runner(monkeypatch, tmp_path):
+    CALLS.clear()
+    fk = make_fake({"Si": 1.0, "C": 4.0})
+    fk.common_concentrations = {"C": {"13C": 0.0107}, "Si": {"29Si": 0.0468}}
+    fk.common_isotopes = {"13C": types.SimpleNamespace(s=0.5), "29Si": types.SimpleNamespace(s=0.5)}
+    monkeypatch.setitem(sys.modules, "pycce", fk)
+    sites = [("C", np.zeros(3), 6), ("Si", np.ones(3) * .5, 2), ("Si", np.ones(3) * .25, 4)]
+    seen = {}
+
+    def load(path, n):
+        seen["n"] = n
+        return None, sites[:n]
+
+    monkeypatch.setattr(pr, "_load_sites", load)
+    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1, site_rule="single_most_spinful"), tmp_path / "out")
+    assert seen["n"] >= len(sites)  # the rule sees every inequivalent site, not the first n_sites_max
+    assert res["n_sites"] == 1 and res["sites"][0]["element"] == "Si" and res["sites"][0]["multiplicity"] == 4
+    assert res["spinful_fraction"] == pytest.approx({"C": 0.0107, "Si": 0.0468})
+
+
+def test_spinful_fractions_drop_spin_zero():
+    pc = types.SimpleNamespace(common_concentrations={"X": {"1X": 0.3, "2X": 0.7}},
+                               common_isotopes={"1X": types.SimpleNamespace(s=0.0), "2X": types.SimpleNamespace(s=1.5)})
+    assert pr._spinful_fractions(pc, ["X", "Y"]) == {"X": pytest.approx(0.7), "Y": 0.0}
+
+
+def test_cap_radii():
+    d = np.arange(1, 101, dtype=float)  # spins at 1, 2, ..., 100 Å
+    assert pr.cap_radii(d, 50.0, 15.0, None) == (50.0, 15.0, False)
+    assert pr.cap_radii(d, 50.0, 15.0, 60) == (50.0, 15.0, False)  # 50 spins inside, under the cap
+    rb, rd, capped = pr.cap_radii(d, 50.0, 15.0, 20)
+    assert capped and rb == pytest.approx(20.5) and rd == pytest.approx(15.0 * 20.5 / 50.0)
+    assert (d <= rb).sum() == 20
+
+
+def test_bath_cap_in_runner(monkeypatch, tmp_path):
+    """A dense fake bath (spins every 1 Å along x) is capped: r_bath and r_dipole shrink together."""
+    CALLS.clear()
+    fk = make_fake({"Al": 1.0})
+
+    class DenseBath(FakeBath):
+        def __init__(self, seed, removed):
+            super().__init__(seed, removed)
+            self.xyz = np.c_[np.arange(1, 3001, dtype=float), np.zeros(3000), np.zeros(3000)]
+
+    class DenseCell(FakeCell):
+        def gen_supercell(self, size, remove=None, seed=None):
+            return DenseBath(seed, remove[0][0])
+
+    fk.read_ase = lambda atoms: DenseCell()
+    monkeypatch.setitem(sys.modules, "pycce", fk)
+    monkeypatch.setattr(pr, "_load_sites", lambda path, n: (None, [("Al", np.zeros(3), 1)]))
+    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=2, ladder=((50.0, 15.0),), max_bath_spins=10),
+                       tmp_path / "out")
+    st = res["sites"][0]["final"]
+    assert st["capped"] and st["n_bath_in_rbath_nominal"] == 50 and st["n_bath_in_rbath"] == 10
+    assert st["r_bath_used_A"] == pytest.approx(10.5) and st["r_dipole_used_A"] == pytest.approx(15 * 10.5 / 50)
+    assert st["r_bath_set_A"] == 50.0 and st["r_bath_A"] == 50.0
+    assert all(kw["r_bath"] == pytest.approx(10.5) for kw in CALLS)
+
+
+def test_single_site_rule_refuses_without_abundances(fake, monkeypatch, tmp_path):
+    fake({"Si": 1.0}, SI)  # the fake PyCCE has no common_concentrations
+    with pytest.raises(RuntimeError, match="spinful"):
+        run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1, site_rule="single_most_spinful"), tmp_path / "out")
