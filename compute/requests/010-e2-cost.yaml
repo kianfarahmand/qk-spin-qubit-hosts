@@ -1,0 +1,66 @@
+# LAUNCHED S017 with Kian's OK (Q20 yes). Drafted S017 (T-070).
+# Results: results/cce/010-e2-cost/ via `python scripts/fetch_cce_results.py 010-e2-cost`.
+#
+# Purpose: E2 cost pilot. E1's census (experiments/E1_notes.md §2, §4) puts 84 % of D-SL in I > 1/2 baths, and 87 % of
+# those have a dominant isotope other than I = 5/2, the only I > 1/2 class with a measured cost (ZnO, MgO; E0_notes §6).
+# One D-SL host per unmeasured class, ADR-0004 protocol exactly (runner defaults since T-067, plus Amendments 1-2),
+# so the 8 records are also the first D-CCE labels. Structures: scripts/make_e2cost_structures.py from the E1
+# OPTIMADE snapshot (same structures as D-SL's T2_SL); compute/structures/e2cost/SOURCES.json.
+#   CaS  mp-1672   33S + 43Ca (I 3/2, 7/2), floored (101 spins in 50 A) -> like CaO at floor 1,000
+#   GaP  mp-2490   31P (1/2) + 69/71Ga (3/2), capped
+#   MgS  mp-1315   25Mg (5/2) + 33S, capped; control against MgO
+#   SrO  mp-2472   87Sr (9/2), 1,068 spins in 50 A
+#   CsBr mp-571222 133Cs (7/2, 100 %) + 79/81Br (3/2), capped; dense_share 0.5, so 20 configurations
+#   GaN  mp-804    14N (1) + 69/71Ga (3/2), capped
+#   CaF2 mp-2741   19F 100 % (dense_half): n_conf rule -> 1 configuration
+#   AlN  mp-661    27Al 100 % + 14N (dense_gt_half): 1 configuration; second point next to Al2O3
+# Levers: 10 vs 20 configurations needs no extra run (per_conf_t2_ms of every step gives the SEM at 10);
+# cap 750 vs 1,500 at B || c on GaP and CsBr (the two capped I > 1/2 hosts with partial abundances; E1_notes §4 named
+# CaS, but CaS is floored, not capped, so a cap has no effect there).
+# Sharding: one direction per shard (Actions 6 h limit; compute/README.md), 26 shards; 20 run at once, 6 queue.
+# Risk: no I = 7/2 or 9/2 cost is measured. If a 20-configuration direction (SrO, CsBr) passes the 6 h limit, the
+# shard writes no record (009 shard 3); its timeout is then itself the cost bound, as in E0_notes §8 finding 4.
+# Supercell: CaS 300 A (floor 1,000 needs r_bath ~107 A; SUPERCELL_SAFE 0.4); the others use the default.
+id: 010-e2-cost
+mode: cce
+nshards: 26
+protocol:
+  central_spin: 0.5
+  b_field_T: 5.0
+  site_rule: single_most_spinful
+  max_bath_spins: 1500
+  min_bath_spins: 1000
+  max_conf_fail_frac: 0.1
+  order: 2
+  method: cce
+  ladder: [[50.0, 15.0]]
+  n_conf: 20
+  as_delay: false
+  seed: 0
+materials:
+  - {id: cas-c, cif: compute/structures/e2cost/CaS_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[0, 0, 1]], supercell: 300}}
+  - {id: cas-ab, cif: compute/structures/e2cost/CaS_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 0]], supercell: 300}}
+  - {id: cas-abc, cif: compute/structures/e2cost/CaS_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 1]], supercell: 300}}
+  - {id: gap-c, cif: compute/structures/e2cost/GaP_zincblende_conventional.cif, protocol: {b_directions_lattice: [[0, 0, 1]]}}
+  - {id: gap-ab, cif: compute/structures/e2cost/GaP_zincblende_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 0]]}}
+  - {id: gap-abc, cif: compute/structures/e2cost/GaP_zincblende_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 1]]}}
+  - {id: mgs-c, cif: compute/structures/e2cost/MgS_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[0, 0, 1]]}}
+  - {id: mgs-ab, cif: compute/structures/e2cost/MgS_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 0]]}}
+  - {id: mgs-abc, cif: compute/structures/e2cost/MgS_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 1]]}}
+  - {id: sro-c, cif: compute/structures/e2cost/SrO_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[0, 0, 1]]}}
+  - {id: sro-ab, cif: compute/structures/e2cost/SrO_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 0]]}}
+  - {id: sro-abc, cif: compute/structures/e2cost/SrO_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 1]]}}
+  - {id: csbr-c, cif: compute/structures/e2cost/CsBr_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[0, 0, 1]]}}
+  - {id: csbr-ab, cif: compute/structures/e2cost/CsBr_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 0]]}}
+  - {id: csbr-abc, cif: compute/structures/e2cost/CsBr_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 1]]}}
+  - {id: gan-c, cif: compute/structures/e2cost/GaN_wurtzite.cif, protocol: {b_directions_lattice: [[0, 0, 1]]}}
+  - {id: gan-ab, cif: compute/structures/e2cost/GaN_wurtzite.cif, protocol: {b_directions_lattice: [[1, 1, 0]]}}
+  - {id: gan-abc, cif: compute/structures/e2cost/GaN_wurtzite.cif, protocol: {b_directions_lattice: [[1, 1, 1]]}}
+  - {id: caf2-c, cif: compute/structures/e2cost/CaF2_fluorite_conventional.cif, protocol: {b_directions_lattice: [[0, 0, 1]]}}
+  - {id: caf2-ab, cif: compute/structures/e2cost/CaF2_fluorite_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 0]]}}
+  - {id: caf2-abc, cif: compute/structures/e2cost/CaF2_fluorite_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 1]]}}
+  - {id: aln-c, cif: compute/structures/e2cost/AlN_wurtzite.cif, protocol: {b_directions_lattice: [[0, 0, 1]]}}
+  - {id: aln-ab, cif: compute/structures/e2cost/AlN_wurtzite.cif, protocol: {b_directions_lattice: [[1, 1, 0]]}}
+  - {id: aln-abc, cif: compute/structures/e2cost/AlN_wurtzite.cif, protocol: {b_directions_lattice: [[1, 1, 1]]}}
+  - {id: gap-c-cap750, cif: compute/structures/e2cost/GaP_zincblende_conventional.cif, protocol: {b_directions_lattice: [[0, 0, 1]], max_bath_spins: 750}}
+  - {id: csbr-c-cap750, cif: compute/structures/e2cost/CsBr_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[0, 0, 1]], max_bath_spins: 750}}

@@ -1,0 +1,25 @@
+# mp-804 from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2023-03-11T19:11:12.801000)
+# written by scripts/make_e2cost_structures.py (T-070); gt_half, I = 1 (14N) + 3/2 (69/71Ga)
+data_mp_804
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   3.18892989
+_cell_length_b   3.18893092
+_cell_length_c   5.19235725
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   119.99999982
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Ga1  Ga  0.66666700  0.33333300  0.49908371  1
+  Ga2  Ga  0.33333300  0.66666700  0.99908371  1
+  N1  N  0.66666700  0.33333300  0.87591629  1
+  N2  N  0.33333300  0.66666700  0.37591629  1

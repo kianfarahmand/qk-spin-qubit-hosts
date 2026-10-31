@@ -1,0 +1,29 @@
+# mp-1315 from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2023-03-11T04:32:54.242000)
+# written by scripts/make_e2cost_structures.py (T-070); gt_half, I = 5/2 (25Mg) + 3/2 (33S); MgO control
+data_mp_1315
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   5.20879532
+_cell_length_b   5.20879501
+_cell_length_c   5.20879501
+_cell_angle_alpha   90.00000785
+_cell_angle_beta   89.99999112
+_cell_angle_gamma   89.99999301
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  S1  S  0.50000000  0.50000000  0.50000000  1
+  S2  S  0.50000000  0.00000000  0.00000000  1
+  S3  S  0.00000000  0.50000000  0.00000000  1
+  Mg1  Mg  0.50000000  0.50000000  0.00000000  1
+  S4  S  0.00000000  0.00000000  0.50000000  1
+  Mg2  Mg  0.50000000  0.00000000  0.50000000  1
+  Mg3  Mg  0.00000000  0.50000000  0.50000000  1
+  Mg4  Mg  0.00000000  0.00000000  0.00000000  1

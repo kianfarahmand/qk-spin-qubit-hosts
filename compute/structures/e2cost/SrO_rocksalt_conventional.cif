@@ -1,0 +1,29 @@
+# mp-2472 from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2023-03-11T11:07:41.495000)
+# written by scripts/make_e2cost_structures.py (T-070); gt_half, I = 9/2 (87Sr)
+data_mp_2472
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   5.16756882
+_cell_length_b   5.16756966
+_cell_length_c   5.16756966
+_cell_angle_alpha   89.99997108
+_cell_angle_beta   89.99999644
+_cell_angle_gamma   90.00000340
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Sr1  Sr  0.50000000  0.50000000  0.50000000  1
+  Sr2  Sr  0.50000000  0.00000000  0.00000000  1
+  Sr3  Sr  0.00000000  0.50000000  0.00000000  1
+  O1  O  0.50000000  0.50000000  0.00000000  1
+  Sr4  Sr  0.00000000  0.00000000  0.50000000  1
+  O2  O  0.50000000  0.00000000  0.50000000  1
+  O3  O  0.00000000  0.50000000  0.50000000  1
+  O4  O  0.00000000  0.00000000  0.00000000  1

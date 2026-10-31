@@ -25,6 +25,14 @@ def test_cce_mode_captures_errors(tmp_path):
         assert main(["--request", str(req), "--shard", str(s), "--out", str(out), "--root", str(tmp_path)]) == 0
     recs = [json.loads(l) for p in sorted(out.glob("shard_*.jsonl")) for l in p.read_text().splitlines()]
     assert {r["id"] for r in recs} == {"a", "b"} and not any(r["ok"] for r in recs)
+    assert all({"cpu_model", "n_cpu", "blas", "numpy"} <= set(r["host"]) for r in recs)  # S017 host fingerprint
+
+
+def test_host_info_keys():
+    from qkhosts.labels.batch import host_info
+
+    h = host_info()
+    assert isinstance(h["cpu_model"], str) and isinstance(h["blas"], str) and h["n_cpu"] >= 1
 
 
 def test_item_protocol_overrides_request():

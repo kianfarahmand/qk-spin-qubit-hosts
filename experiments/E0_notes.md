@@ -239,3 +239,61 @@ diagnostics (`conf_errors`: configuration, seed, spins in r_bath, smallest centr
 `max_conf_fail_frac` = 10 % failures void the step (`fit_flag = "conf_errors"`). Tests in `tests/test_pycce_runner.py`.
 Re-run `compute/requests/009-e0b-cao.yaml` (CaO, one direction per shard at floor 1,000; c at floor 2,000 with
 10 configurations) launched S015 with Kian's OK (Q16b; public `6de3ac0`, run 41181177145). ADR-0004 Amendment 1 accepted (Q16a).
+
+## 8. 009-e0b-cao (run 41181177145): CaO label, floor convergence, LinAlgError (S017)
+
+**Source:** `results/cce/009-e0b-cao/merged.jsonl` (3 records, 3 ok; public `6de3ac0`; artifact `cce-009-e0b-cao-merged`,
+fetched S017 with `python scripts/fetch_cce_results.py 009-e0b-cao`); tables from
+`python scripts/analyse_e0b.py results/cce/009-e0b-cao`. Runner = ADR-0004 defaults + T-068 (public `6de3ac0`).
+Software on every job: ubuntu-24.04, Python 3.11.17, numpy 1.26.4, scipy 1.11.4, PyCCE 1.1.1, the same as in 008
+(job logs of runs 41116974041 and 41181177145).
+
+| item | B | floor | spins in r_bath (nominal 50 Å) | r_bath/r_dipole Å | T2 curve ms (n) | mean-of-fits ± SEM ms | per-conf n (median) | failed confs | wall s |
+|---|---|---|---|---|---|---|---|---|---|
+| cao-c (Ca site) | c [001] | 1,000 | 1,000 (28) | 157.5/47.3 | 26.6 (2.16) | 26.5 ± 1.9 | 3.19 | 0/20 | 6,959 |
+| cao-ab | a+b [110] | 1,000 | 1,000 (28) | 157.5/47.3 | 27.6 (2.22) | 27.4 ± 2.1 | 3.48 | 0/20 | 12,389 |
+| cao-abc | a+b+c [111] | 1,000 | 1,000 (28) | 157.5/47.3 | 28.4 (1.92) | 28.2 ± 2.0 | 2.98 | 0/20 | 5,813 |
+| cao-c-floor2000 | c | 2,000 | — | — | **no record**: shard 3 hit the 5 h 55 min job limit (10 configurations) | | | | > 21,000 |
+
+Every item: windows tried 50 then 200 ms (t_max 200 ms), no failed per-configuration fit, `fit_flag` empty, `label_ok`.
+The shard-3 artifact holds an empty `shard_3.jsonl`: the runner writes a record only when an item ends.
+
+Findings:
+1. **CaO label (ADR-0004, log-mean of c, a+b, a+b+c): 27.5 ms**, direction spread 0.028 dex. With this, all 8 Kanai
+   Table S1 hosts have an E0/E0b result.
+2. **Kanai frame (<111>, fcc primitive):** curve 28.4 ms (n 1.92) = **0.89 of Kanai's averaged-curve fit** (31.8 ms,
+   n 2.06; -0.050 dex); mean-of-fits 28.2 ms = **0.76 of Table S1** (37.2(71) ms; -0.121 dex), just below Kanai's
+   one-SD band. Here mean-of-fits is valid (0/20 failed fits; the window reached 200 ms, unlike CeO2 in §7), and the
+   per-configuration n (median 2.98) is close to Table S1's 2.84. CaO is the lowest of the 7 hosts with a valid
+   mean-of-fits (range now 0.76–0.97 of Table S1, -0.12 to -0.01 dex; all below Kanai). Kanai's own averaged curve is
+   0.85 of Table S1 for CaO, so part of the gap is Kanai's estimator (curve vs mean-of-fits), as for the other hosts.
+3. **Floor convergence (paired), B ∥ c:** floor 500 (008 `cao-c-floor500`) and floor 1,000 (009 `cao-c`) use the same
+   seeds and the same 450 Å supercell, so each configuration's inner bath is identical and the floor only adds the
+   shell from 123.8 to 157.5 Å. Per configuration, Δlog10 T2 (1,000 - 500) = **-0.0022 dex mean, SD 0.0021, range
+   -0.0081 to -0.0001** (20 pairs); curve fit -0.0022 dex, mean-of-fits -0.0027 dex. Doubling the bath changes T2 by
+   0.5 %, a tenth of the 0.02 dex tolerance. **Floor 1,000 is converged for CaO.** The 2,000 point is still missing
+   (008: LinAlgError after 19,231 s; 009: timed out). It cannot be paired with these runs anyway: 2,000 spins need
+   r_bath ≈ 200 Å and a supercell ≥ 500 Å (`SUPERCELL_SAFE`), which redraws every isotope.
+4. **Cost of the floor (wall s per configuration evaluation, 21 evaluations per item: 20 configurations + the first
+   one's 50 ms window):** floor 500 84 s; floor 1,000 277–590 s (c 331, a+b 590, a+b+c 277; the a+b job was about 2x
+   slower with identical work, so runner speed varies); floor 2,000 **> 1,900 s** (at most 10 of 11 evaluations in
+   about 21,000 s), so floor 2,000 cannot run 10 configurations in one 6 h job. Each floor doubling costs about 4–6x,
+   not 2x. CaO at floor 1,000: 1.6–3.4 h per direction, 7.0 h of runner time for 3 directions (25,161 s).
+5. **LinAlgError (Amendment 1, T-068): not reproduced.** No configuration failed in 009 (60 of 60 ran;
+   `conf_errors` is empty in all 3 records, so there are no bath diagnostics to report). In 008, `cao-A` failed after
+   205 s, less than one evaluation takes at floor 1,000 (277–590 s), so most likely inside the first evaluation of its
+   first direction (c; seed 1, 50 ms window). 009's `cao-c` computed that same configuration (same seed, supercell, floor, radii and package versions) without error. So the failure is
+   **not a property of the CaO bath** and not deterministic at the input level. The likely source is the job's
+   numerical environment (LAPACK `eigh` on a different runner CPU or BLAS kernel path). The CPU model was not logged,
+   so this is **not established**. The 10 % rule of Amendment 1 stays as the safety net; no protocol change is needed.
+   **Runner change (S017):** `qkhosts.labels.batch.host_info()` now stores the CPU model, CPU count, BLAS build and
+   package versions in every CCE record (`host`), so a future failure can be tied to the hardware (`tests/test_batch.py`).
+6. **Partial results are lost on a timeout.** The 6 h limit on one item loses all of its configurations. For E2's
+   I > 1/2 items (3.4 h per direction in this run) that is a real risk. T-015 (resumable runner) should write one
+   line per finished configuration (curve + diagnostics), so that a timed-out item can be resumed or merged.
+
+**Optional floor-2,000 check (not needed to close ADR-0004; proposed to Kian S017):** a paired run in 2 shards on
+one 560 Å supercell (seeds 1–3, B ∥ c, `t_max_ms: 200`): floor 1,000 (about 20 min) and floor 2,000 (3 configurations,
+about 2–3 h by finding 4). The reason to run it: one more point for the ADR-0004 floor. The reason to skip it: the
+paired 500 -> 1,000 step is already 0.0022 dex, and CeO2 at floor 1,000 matches Kanai's curve (0.985). Not drafted
+unless Kian asks (Q19).

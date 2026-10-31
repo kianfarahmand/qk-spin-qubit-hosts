@@ -44,6 +44,29 @@ def _versions() -> dict:
     return out
 
 
+def host_info() -> dict:
+    """S017: the job's numerical environment, stored in every CCE record. 008's CaO `LinAlgError` did not recur in 009
+    with the same seeds and package versions, so failures may depend on the runner's CPU / BLAS kernels; this records
+    them (CPU model from /proc/cpuinfo on Linux, logical CPU count, numpy's BLAS name and version, package versions)."""
+    import os
+    cpu = platform.processor() or ""
+    try:
+        for line in Path("/proc/cpuinfo").read_text(encoding="utf-8", errors="replace").splitlines():
+            if line.startswith("model name"):
+                cpu = line.split(":", 1)[1].strip()
+                break
+    except OSError:
+        pass
+    blas = ""
+    try:
+        cfg = np.show_config(mode="dicts")  # numpy >= 1.25
+        b = (cfg or {}).get("Build Dependencies", {}).get("blas", {})
+        blas = f"{b.get('name', '')} {b.get('version', '')}".strip()
+    except Exception:  # noqa: BLE001
+        pass
+    return {"cpu_model": cpu, "n_cpu": os.cpu_count(), "blas": blas, **_versions()}
+
+
 def envcheck() -> dict:
     """Probe the installed PyCCE API and run a tiny diamond 13C-bath toy calculation.
     The output (signatures, timings, toy T2) is what E0 needs to finish run_material (T-010).
@@ -108,11 +131,12 @@ def run_shard(req: dict, shard: int, nshards: int, out: Path, root: Path) -> int
             print(json.dumps(rec, indent=1, default=str))
             return 0
         items = req.get("materials", [])[shard::nshards]
+        host = host_info()
         for it in items:
             t0 = time.time()
             proto = _protocol(req, it)
             rec = {"request": req["id"], "shard": shard, "id": it["id"], "protocol_hash": protocol_hash(proto),
-                   "protocol": asdict(proto)}
+                   "protocol": asdict(proto), "host": host}
             try:
                 rec.update(run_material(root / it["cif"], proto, out / "per_material", name=it["id"]))
                 rec["ok"] = True

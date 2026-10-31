@@ -1,7 +1,7 @@
 # ADR-0004: CCE label protocol
 **Status:** **accepted** by Kian (S015, 2026-10-30; Q14 "Accept"). Item 2 decided by Kian (S012): option A. E0b
-(007-e0b) is closed; only the floor value (item 5) is provisional until 008-e0b-dilute (launched S015, Q13). Evidence: `experiments/E0_notes.md`
-(runs 004, 005, 006; §6 for 007).
+(007-e0b) is closed; the floor value (item 5) was provisional until 008/009 and is **settled at 1,000 (S017, Amendment 2)**.
+Evidence: `experiments/E0_notes.md` (runs 004, 005, 006; §6 for 007; §7 for 008; §8 for 009).
 
 ## Context
 E2 (D-CCE) needs one fixed PyCCE protocol for 500–3,000 materials. Kanai (2022) gives the physics settings but
@@ -41,9 +41,11 @@ a dense bath. Sizes of the effects measured, in log10 T2:
 5. **Cut-offs and bath size:** r_bath 50 Å, r_dipole 15 Å, supercell 200 Å, single rung in production, then:
    - **Cap `max_bath_spins: 1500`** (dense baths): r_bath shrinks to enclose 1,500 spins, r_dipole by the same factor.
      Al2O3 (27Al 100 %): cap 1,500 is within 0.003 dex of cap 3,000; cap 750 is +0.019 dex (edge of the 0.02 tolerance).
-   - **Floor `min_bath_spins: 1000`** (ultra-dilute baths; **provisional until 008-e0b-dilute**, Q13): r_bath (and the
-     supercell) grow to enclose 1,000 spins, r_dipole by the same factor (Kanai: "~1,000 bath spins"). CaO and CeO2
-     have 30 and 9 spins inside 50 Å and give no usable fit without it (T-066). 008 tests floors 500/1,000/2,000 on CaO.
+   - **Floor `min_bath_spins: 1000`** (ultra-dilute baths; settled S017, Amendment 2): r_bath (and the supercell) grow
+     to enclose 1,000 spins, r_dipole by the same factor (Kanai: "~1,000 bath spins"). CaO and CeO2 have 30 and 9 spins
+     inside 50 Å and give no usable fit without it (T-066). CaO B ∥ c, paired floor 500 -> 1,000: -0.0022 dex per
+     configuration (SD 0.0021, 20 pairs; E0_notes §8); floor 2,000 did not finish in a 6 h job (> 1,900 s per
+     configuration).
    - **Fit guard** (`guard_fit`, T-066): a fit is NaN when n is outside [0.5, 6], T2 lies outside the sampled window,
      or too few points are usable; the host label is NaN (`label_ok = false`) rather than a log-mean of bad fits.
    - Audit: a 65/20 Å rung (scaled the same way under cap or floor) on the 5 % subsample; if |Δlog10 T2| > 0.02 for
@@ -74,10 +76,13 @@ CeO2) and **c for hexagonal ones** (4H-SiC, quartz, ZnO). Si settles it ([001] 1
 | 4H-SiC c | 0.91 | 0.95 |
 | MgO [111] (cap 1,500) | 0.97 | 1.01 |
 | CeO2 [111] (floor 1,000; 008, added S015) | not valid (biased, see Amendment 1) | 0.98 |
-| CaO | pending 009 (008 failed above floor 500) | |
+| CaO [111] (floor 1,000; 009, added S017) | 0.76 | 0.89 |
 
-All six are below Table S1 (-0.10 to -0.01 dex). Their range (0.08 dex) is small next to the direction spread, and the
-mean offset is absorbed by the Δ intercept. Diamond's decay shape stays off (n 1.70 vs 2.38): question for the CCE
+All seven valid mean-of-fits ratios are below Table S1 (-0.12 to -0.01 dex); against Kanai's averaged curves the
+eight hosts give 0.86–1.01. The range is small next to the direction spread, and the mean offset is absorbed by the
+Δ intercept. **Only CeO2, CaO and MgO of these hosts are in D-SL** (with alpha-Al2O3, which has no Table S1 value):
+diamond, 4H-SiC, alpha-quartz, Si and ZnO are not members of Kanai's host list (one GGA-hull entry per composition;
+`experiments/E1_notes.md` §1), so they benchmark the protocol, not D-SL labels. Diamond's decay shape stays off (n 1.70 vs 2.38): question for the CCE
 collaborator (ADR-0006). The E0 reading "diamond [001] matches Table S1" was a coincidence (Si shows it).
 
 ## Cost and E2 budget per nuclear-spin class (option A, 3 directions, one site, one Actions runner)
@@ -88,7 +93,7 @@ From E0b wall times (`experiments/E0_notes.md` §6 finding 6):
 | I = 1/2, dilute, 20 configurations | 13C, 29Si (diamond, Si, SiC, quartz) | 1.0–3.1 min | 3–9 min |
 | I > 1/2, 20 configurations | 67Zn (ZnO, 911 spins); 25Mg (MgO, cap 1,500) | 56–67 min; 101–149 min | 2.8–3.4 h; 5.1–7.5 h |
 | I > 1/2, ~100 % abundant, 1 configuration (item 6), cap 1,500 | 27Al (Al2O3, B ∥ c only) | ~12 min | ~36 min |
-| ultra-dilute with floor | CaO, CeO2 | pending 008 | |
+| ultra-dilute with floor 1,000, 20 configurations | CeO2 (17O); CaO (43Ca + 17O) | 1.5 h; 1.6–3.4 h | 4.4 h; 7.0 h |
 
 E2 for N materials ≈ N x (f_1/2 x 6 min + f_>1/2 x 3–7.5 h + f_dense x 0.6 h). The class mix f is unknown until E1/T-014;
 most spinful elements have I > 1/2, so f_>1/2 is likely large. Example: 500 materials all in the I > 1/2 class ≈
@@ -122,6 +127,19 @@ estimate (~9 min per material) holds only for I = 1/2. Actions' 6 h job limit me
 - (c) **Item 7 caveat:** for ensembles with a wide T2 spread (ultra-dilute baths), mean-of-fits is biased low because
   slow configurations do not decay inside the window set by the averaged curve (CeO2: 4–9 of 20 fits fail; mean-of-fits
   0.60 of Table S1). Benchmarks against Table S1 for such hosts use the curve fit against Kanai's averaged curve.
+
+**Amendment 2 (S017, 2026-10-31; records evidence, no protocol change; for Kian to note).** Evidence: 009-e0b-cao
+(`experiments/E0_notes.md` §8).
+- (a) **Item 5 floor settled at 1,000.** CaO B ∥ c, floors 500 and 1,000 with the same seeds and supercell (identical
+  inner bath): Δlog10 T2 = -0.0022 dex mean per configuration (SD 0.0021, max |Δ| 0.008), a tenth of the 0.02
+  tolerance. CeO2 at 1,000 matches Kanai's averaged curve (0.985). Floor 2,000 is unmeasured (008 LinAlgError; 009
+  timeout at > 1,900 s per configuration).
+- (b) **Amendment 1(a) stays as the safety net.** 008's CaO `LinAlgError` did not recur in 009 with the same seed,
+  inputs and package versions (60/60 configurations ran), so it is not a property of the bath; the likely cause is
+  the job's numerical environment (not established). Every CCE record now stores the runner's CPU model and BLAS
+  (`host`, S017).
+- (c) **CaO benchmark added** (Benchmarks table): label 27.5 ms; <111> mean-of-fits 0.76 of Table S1, curve 0.89 of
+  Kanai's curve. Mean-of-fits is valid for CaO (0/20 failed fits), unlike CeO2.
 
 ## Literature inputs (T-005, S005)
 Full notes with locations: `literature/notes/kanai2022_si.md`, `literature/notes/toriyama2025.md`. Summary:

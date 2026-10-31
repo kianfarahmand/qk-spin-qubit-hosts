@@ -31,6 +31,37 @@ def fetch_entry(mp_id: str, base_url: str = BASE_URL, timeout: float = 60.0) -> 
         return json.loads(r.read().decode("utf-8"))
 
 
+E1_FIELDS = ("chemical_formula_reduced", "nsites", "lattice_vectors", "cartesian_site_positions", "species_at_sites",
+             "species", "_mp_stability", "last_modified")
+
+
+def id_filter(mp_ids: list[str]) -> str:
+    """OPTIMADE filter selecting exactly these ids: 'id="mp-1" OR id="mp-2"'. Ids must look like mp-<digits> or
+    mvc-<digits> (25 of Kanai's hosts carry MP's older mvc- prefix)."""
+    for i in mp_ids:
+        pre, _, num = i.partition("-")
+        if pre not in ("mp", "mvc") or not num.isdigit():
+            raise ValueError(f"not an mp-id: {i!r}")
+    return " OR ".join(f'id="{i}"' for i in mp_ids)
+
+
+def fetch_ids(mp_ids: list[str], fields=E1_FIELDS, base_url: str = BASE_URL,
+              timeout: float = 120.0) -> dict:  # pragma: no cover - network
+    """One OPTIMADE call for up to 100 ids; returns the full response. Raises if the server reports more pages."""
+    import urllib.parse
+    if len(mp_ids) > 100:
+        raise ValueError("at most 100 ids per call")
+    q = urllib.parse.urlencode({"filter": id_filter(mp_ids), "page_limit": 100, "response_fields": ",".join(fields)})
+    req = urllib.request.Request(f"{base_url}/structures?{q}", headers={
+        "User-Agent": "qkhosts/0 (+https://github.com/kianfarahmand/qk-spin-qubit-hosts)",
+        "Accept": "application/vnd.api+json, application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:  # noqa: S310 (fixed https URL)
+        d = json.loads(r.read().decode("utf-8"))
+    if d.get("meta", {}).get("more_data_available"):
+        raise RuntimeError("OPTIMADE returned a partial page")
+    return d
+
+
 def cell_parameters(lattice: np.ndarray) -> tuple[float, float, float, float, float, float]:
     """(a, b, c) in Å and (α, β, γ) in degrees from lattice vectors given as rows (Å)."""
     L = np.asarray(lattice, float)

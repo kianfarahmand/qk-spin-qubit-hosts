@@ -1,0 +1,25 @@
+# mp-661 from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2023-03-11T12:23:17.435000)
+# written by scripts/make_e2cost_structures.py (T-070); dense_gt_half, 27Al 100 % (next to Al2O3)
+data_mp_661
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   3.12858800
+_cell_length_b   3.12858827
+_cell_length_c   5.01695500
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   119.99999712
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Al1  Al  0.66666700  0.33333300  0.49928700  1
+  Al2  Al  0.33333300  0.66666700  0.99928700  1
+  N1  N  0.66666700  0.33333300  0.88071300  1
+  N2  N  0.33333300  0.66666700  0.38071300  1

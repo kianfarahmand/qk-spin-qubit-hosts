@@ -1,0 +1,33 @@
+# mp-2741 from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2023-03-11T10:44:58.527000)
+# written by scripts/make_e2cost_structures.py (T-070); dense_half, 19F 100 %
+data_mp_2741
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   5.51605145
+_cell_length_b   5.51605218
+_cell_length_c   5.51605218
+_cell_angle_alpha   89.99999711
+_cell_angle_beta   90.00000045
+_cell_angle_gamma   89.99999955
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  F1  F  0.75000000  0.75000000  0.25000000  1
+  F2  F  0.75000000  0.25000000  0.75000000  1
+  F3  F  0.25000000  0.75000000  0.75000000  1
+  F4  F  0.25000000  0.25000000  0.25000000  1
+  F5  F  0.75000000  0.75000000  0.75000000  1
+  F6  F  0.75000000  0.25000000  0.25000000  1
+  F7  F  0.25000000  0.75000000  0.25000000  1
+  Ca1  Ca  0.50000000  0.50000000  0.00000000  1
+  F8  F  0.25000000  0.25000000  0.75000000  1
+  Ca2  Ca  0.50000000  0.00000000  0.50000000  1
+  Ca3  Ca  0.00000000  0.50000000  0.50000000  1
+  Ca4  Ca  0.00000000  0.00000000  0.00000000  1

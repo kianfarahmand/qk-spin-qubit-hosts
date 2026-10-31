@@ -1,0 +1,29 @@
+# mp-1672 from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2023-03-11T06:40:24.667000)
+# written by scripts/make_e2cost_structures.py (T-070); gt_half, I = 3/2 (33S) + 7/2 (43Ca)
+data_mp_1672
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   5.70474859
+_cell_length_b   5.70474858
+_cell_length_c   5.70474858
+_cell_angle_alpha   89.99997058
+_cell_angle_beta   89.99999165
+_cell_angle_gamma   90.00000835
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  S1  S  0.50000000  0.50000000  0.50000000  1
+  S2  S  0.50000000  0.00000000  0.00000000  1
+  S3  S  0.00000000  0.50000000  0.00000000  1
+  Ca1  Ca  0.50000000  0.50000000  0.00000000  1
+  S4  S  0.00000000  0.00000000  0.50000000  1
+  Ca2  Ca  0.50000000  0.00000000  0.50000000  1
+  Ca3  Ca  0.00000000  0.50000000  0.50000000  1
+  Ca4  Ca  0.00000000  0.00000000  0.00000000  1

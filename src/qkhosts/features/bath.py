@@ -25,6 +25,22 @@ def isotope_densities(counts: Mapping[str, float], volume_A3: float, iso: pd.Dat
     return rows.reset_index(drop=True)
 
 
+KANAI_SPIN_FREE = ("Ce", "Ar")  # T2_Listup_v1.0.py PyT2Ele: stable, no spinful isotope -> T2 = inf
+KANAI_MISSING_T2_S = 1e-20  # PyT2Ele: any other element absent from isotopetable.csv -> T2 = 1e-20 s
+
+
+def t2_kanai_rule(counts: Mapping[str, float], volume_A3: float, iso: pd.DataFrame,
+                  p: ScalingLawParams) -> float:
+    """Scaling-law T2 (s) with the authors' rule for elements missing from the isotope table (ADR-0002):
+    Ce and Ar add nothing; any other missing element (e.g. radioactive-only Th, Tc, Pm, U) adds a term
+    T2 = 1e-20 s, which dominates the sum. One sum over all isotopes of all elements, as in the script."""
+    r = isotope_densities(counts, volume_A3, iso)
+    t2i = list(t2_isotope(r["g_factor"].to_numpy(), r["spin_I"].to_numpy(), r["n_cm3"].to_numpy(), p))
+    known = set(iso["element"])
+    t2i += [KANAI_MISSING_T2_S for e in counts if e not in known and e not in KANAI_SPIN_FREE]
+    return combine(np.asarray(t2i, float), p.eta)
+
+
 def bath_descriptors(counts: Mapping[str, float], volume_A3: float, iso: pd.DataFrame,
                      p: ScalingLawParams) -> dict[str, float]:
     r = isotope_densities(counts, volume_A3, iso)
