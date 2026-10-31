@@ -15,7 +15,14 @@ Settings come from the T-005 literature read (S005; `literature/notes/kanai2022_
   until that many spins sit inside (see `floor_radii`); r_dipole grows by the same factor.
 - Fit guard (T-066, S014): fits with n outside `fit_n_range`, T2 outside the sampled window or too few usable
   points become NaN (`guard_fit`), and a NaN in any site or direction makes the host label NaN (`label_ok`).
+- Failed configurations (T-068, S015): a configuration whose PyCCE call raises `numpy.linalg.LinAlgError` (008: CaO at
+  floors 1,000 and 2,000) is skipped and recorded with bath diagnostics (`conf_errors`, see `bath_diagnostics`); if
+  more than `max_conf_fail_frac` of the configurations fail, the step's T2 is NaN (`fit_flag = "conf_errors"`).
 - Convergence ladder over (r_bath, r_dipole) starting at Toriyama's screening values 50/15 Å.
+- Defaults = ADR-0004 as accepted in S015 (T-067): single 50/15 Å rung, `single_most_spinful` site, field along
+  c, a+b, a+b+c, cap 1,500, floor 1,000, 20 configurations, or `n_conf_dense` (1) when the bath is almost all
+  ~100 %-abundant isotopes (see `dense_bath_share`). `E0_PROTOCOL` keeps the E0 pilot settings (3 sites, 3 rungs,
+  one Cartesian direction, no cap/floor/dense rule) for the tests and re-analysis.
 - Per site and ladder step, coherence curves are averaged over n_conf isotope configurations before
   the fit (Toriyama); the mean of per-configuration fits is also recorded (ADR-0004 decides).
 
@@ -27,7 +34,8 @@ from __future__ import annotations
 
 import json
 import time
-from dataclasses import asdict, dataclass, field
+from collections import Counter
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 
 import numpy as np
@@ -39,19 +47,23 @@ GAUSS_PER_TESLA = 1e4
 class CCEProtocol:
     central_spin: float = 0.5           # S
     central_g: float = 2.0
-    site_rule: str = "host_atom_removed_avg_inequivalent"  # ADR-0004; or "origin_kanai" (see origin_site)
+    site_rule: str = "single_most_spinful"  # ADR-0004 item 3; or "host_atom_removed_avg_inequivalent" (E0), "origin_kanai"
     n_sites_max: int = 3
     b_field_T: float = 5.0
     b_direction: tuple = (0.0, 0.0, 1.0)  # Cartesian; pymatgen puts the c axis along z
-    b_directions_lattice: tuple | None = None  # e.g. ((0,0,1), (1,1,0), (1,1,1)); overrides b_direction
-    max_bath_spins: int | None = None   # cap on spins inside r_bath (dense baths); None = no cap
-    min_bath_spins: int | None = None   # floor on spins inside r_bath (ultra-dilute baths); None = no floor
+    b_directions_lattice: tuple | None = ((0, 0, 1), (1, 1, 0), (1, 1, 1))  # ADR-0004 item 2 (A); None: b_direction
+    max_bath_spins: int | None = 1500   # cap on spins inside r_bath (dense baths); None = no cap
+    min_bath_spins: int | None = 1000   # floor on spins inside r_bath (ultra-dilute baths; provisional until 008)
     fit_n_range: tuple = (0.5, 6.0)     # accepted stretch exponents (fit guard)
+    max_conf_fail_frac: float = 0.1     # T-068: more failed (LinAlgError) configurations than this voids the step
     order: int = 2
     method: str = "cce"                 # PyCCE compute method: "cce" (conventional) or "gcce"
-    ladder: tuple = ((50.0, 15.0), (65.0, 20.0), (80.0, 25.0))  # (r_bath, r_dipole) Å, climbed in order
+    ladder: tuple = ((50.0, 15.0),)     # (r_bath, r_dipole) Å, climbed in order; production: one rung (ADR-0004)
     supercell: int = 200
     n_conf: int = 20                    # random isotope configurations
+    n_conf_dense: int | None = 1        # configurations for ~100 %-abundant baths (ADR-0004 item 6); None = off
+    dense_min_abundance: float = 0.99   # an isotope counts as "dense" at this natural abundance or more
+    dense_min_share: float = 0.99       # ... and the rule applies when such isotopes give this share of bath spins
     t_max_ms: float = 50.0              # initial window; adapted to the decay (see _adapt_window)
     n_t: int = 201
     min_fit_points: int = 15            # points with 0.05 < L < 0.95 needed for a fit
@@ -61,6 +73,11 @@ class CCEProtocol:
     converge_tol_log10: float = 0.02    # |Δlog10 T2| between successive ladder steps
     seed: int = 0
     extra: dict = field(default_factory=dict)
+
+
+# E0 pilot settings (S006-S012): the defaults before ADR-0004 was accepted.
+E0_PROTOCOL = dict(site_rule="host_atom_removed_avg_inequivalent", b_directions_lattice=None, max_bath_spins=None,
+                   min_bath_spins=None, ladder=((50.0, 15.0), (65.0, 20.0), (80.0, 25.0)), n_conf_dense=None)
 
 
 def fit_t2(t_ms: np.ndarray, coherence: np.ndarray) -> tuple[float, float]:
@@ -150,14 +167,32 @@ def pick_site(sites: list, spinful_fraction: dict) -> tuple:
     return next(s for s in own if s[2] == top)
 
 
-def _spinful_fractions(pc, elements) -> dict:
-    """element -> total abundance of spinful isotopes in PyCCE's natural-abundance table. Isotopes with
+def _spinful_isotopes(pc, elements) -> dict:
+    """element -> {isotope: natural abundance (0-1)} of its spinful isotopes in PyCCE's table. Isotopes with
     spin 0 are dropped when PyCCE's `common_isotopes` exposes spins (they should not be in the table)."""
     iso = _isotopes(None, pc, elements) or {}
     spins = getattr(pc, "common_isotopes", None) or getattr(getattr(pc, "bath", None), "common_isotopes", None) or {}
-    return {el: float(sum(v for k, v in iso.get(el, {}).items()
-                          if k not in spins or float(getattr(spins[k], "s", 1.0)) > 0))
+    return {el: {k: float(v) for k, v in iso.get(el, {}).items()
+                 if k not in spins or float(getattr(spins[k], "s", 1.0)) > 0}
             for el in elements}
+
+
+def _spinful_fractions(pc, elements) -> dict:
+    """element -> total abundance of spinful isotopes in PyCCE's natural-abundance table."""
+    return {el: float(sum(d.values())) for el, d in _spinful_isotopes(pc, elements).items()}
+
+
+def dense_bath_share(counts: dict, spinful_iso: dict, min_abundance: float = 0.99) -> float:
+    """ADR-0004 item 6 (`n_conf` rule). counts: element -> atoms per cell; spinful_iso: element -> {isotope:
+    abundance}. Returns the share (0-1) of expected spinful nuclei per cell that come from isotopes with natural
+    abundance >= min_abundance; 0 when the cell has no spinful nuclei. Such nuclei are in every configuration, so
+    configurations differ only by the rare rest (Al2O3: 27Al 100 %, 5 configurations agree to SEM ~3e-10 ms, 007)."""
+    tot = dense = 0.0
+    for el, n in counts.items():
+        for f in spinful_iso.get(el, {}).values():
+            tot += n * f
+            dense += n * f if f >= min_abundance else 0.0
+    return dense / tot if tot > 0 else 0.0
 
 
 def field_directions(cell, proto: "CCEProtocol") -> list[tuple[list | None, np.ndarray]]:
@@ -222,6 +257,20 @@ def guard_fit(t2: float, n: float, ts: np.ndarray, n_points: int, min_points: in
     if not ts[1] <= t2 <= ts[-1]:
         return float("nan"), float("nan"), "t2_outside_window"
     return float(t2), float(n), ""
+
+
+def bath_diagnostics(xyz_A: np.ndarray, dist_A: np.ndarray, r_bath: float) -> dict:
+    """T-068: geometry of one bath configuration, for a configuration whose PyCCE call failed. xyz_A: spin positions
+    (Å), dist_A: their distances to the centre (Å). Returns the spin count inside r_bath, the smallest centre-spin
+    distance, the smallest spin-spin distance inside r_bath (a zero means duplicated spins), all in Å."""
+    xyz, d = np.asarray(xyz_A, float).reshape(-1, 3), np.asarray(dist_A, float)
+    m = d <= r_bath
+    pair = float("nan")
+    if m.sum() > 1:
+        from scipy.spatial import cKDTree
+        pair = float(cKDTree(xyz[m]).query(xyz[m], k=2)[0][:, 1].min())
+    return {"n_in_rbath": int(m.sum()), "min_center_dist_A": float(d.min()) if len(d) else float("nan"),
+            "min_pair_dist_A": pair}
 
 
 def _center_position(cell, frac: np.ndarray) -> np.ndarray:
@@ -293,20 +342,46 @@ def _site_step(pc, cell, element, frac, r_bath, r_dipole, proto, ts=None, b_unit
     def coh(b, t):
         return _coherence(pc, b, pos, t, r_bath, r_dipole, proto, b_unit)
 
-    tried = None
-    if ts is None:
-        ts, L0, tried = _adapt_window(lambda t: coh(b0, t), proto)
-        curves = [L0]
-    else:
-        curves = [coh(b0, ts)]
+    errors: list[dict] = []
+
+    def safe(k, b, run):  # T-068: one failing configuration is recorded, not fatal
+        try:
+            return run()
+        except np.linalg.LinAlgError as e:
+            errors.append({"conf": k, "seed": proto.seed + 1 + k, "error": f"{type(e).__name__}: {e}",
+                           **bath_diagnostics(*distances(b), r_bath)})
+            return None
+
     n_bath = int(len(b0))
-    del b0
-    curves += [coh(bath(k), ts) for k in range(1, proto.n_conf)]
+    tried, curves, k, b = None, [], 0, b0
+    while ts is None and k < proto.n_conf:  # the window comes from the first configuration that runs
+        got = safe(k, b, lambda: _adapt_window(lambda t: coh(b, t), proto))
+        if got is not None:
+            ts, L0, tried = got
+            curves.append(L0)
+        else:
+            k += 1
+            b = bath(k) if k < proto.n_conf else None
+    if ts is None:
+        raise RuntimeError(f"all {proto.n_conf} configurations failed: {errors[0]['error']}")
+    if not curves:  # window given by an earlier ladder step
+        got = safe(k, b, lambda: coh(b, ts))
+        if got is not None:
+            curves.append(got)
+    del b0, b
+    for j in range(k + 1, proto.n_conf):
+        bj = bath(j)
+        got = safe(j, bj, lambda: coh(bj, ts))
+        if got is not None:
+            curves.append(got)
+        del bj
     curves = np.array(curves)
     mean_curve = curves.mean(axis=0)
     npts, rng = n_fit_points(mean_curve), proto.fit_n_range
     t2_avg, n_avg, flag = guard_fit(*fit_t2(ts, mean_curve), ts, npts, proto.min_fit_points, rng)
     t2_nls, n_nls, _ = guard_fit(*fit_t2_nls(ts, mean_curve), ts, npts, proto.min_fit_points, rng)
+    if len(errors) > proto.max_conf_fail_frac * proto.n_conf:
+        t2_avg, n_avg, t2_nls, n_nls, flag = (float("nan"),) * 4 + ("conf_errors",)
     fits = np.array([guard_fit(*fit_t2(ts, c), ts, n_fit_points(c), 3, rng)[:2] for c in curves],
                     float).reshape(-1, 2)
     per = fits[:, 0]
@@ -322,6 +397,7 @@ def _site_step(pc, cell, element, frac, r_bath, r_dipole, proto, ts=None, b_unit
             "t2_ms_mean_of_fits": float(ok.mean()) if len(ok) else float("nan"),
             "t2_sem_ms": float(ok.std(ddof=1) / np.sqrt(len(ok))) if len(ok) > 1 else float("nan"),
             "n_fit_failed": int(len(per) - len(ok)), "n_bath": n_bath,  # whole supercell, not r_bath
+            "n_conf_ok": int(len(curves)), "conf_errors": errors,
             "min_bath_dist_A": float(dist.min()) if len(xyz) else float("nan"),
             "t_max_ms": float(ts[-1]), "windows_tried_ms": tried, "_ts": ts}
 
@@ -372,11 +448,19 @@ def run_material(structure_path: str | Path, proto: CCEProtocol, out_dir: str | 
         atoms, sites = _load_sites(structure_path, proto.n_sites_max)
     cell = pc.read_ase(atoms) if hasattr(pc, "read_ase") else pc.BathCell.from_ase(atoms)
     dirs = field_directions(cell, proto)
+    run_proto, share = proto, None
+    symbols = _symbols(atoms)
+    if proto.n_conf_dense is not None and symbols:  # ADR-0004 item 6: one configuration for ~100 % baths
+        counts = Counter(symbols)
+        share = dense_bath_share(counts, _spinful_isotopes(pc, sorted(counts)), proto.dense_min_abundance)
+        if share >= proto.dense_min_share:
+            run_proto = replace(proto, n_conf=min(proto.n_conf, proto.n_conf_dense))
     per_site = []
     for element, frac, mult in sites:
         recs = []
         for combo, b_unit in dirs:
-            r = _converge_site(pc, cell, element, np.asarray(frac, float), proto, None if combo is None else b_unit)
+            r = _converge_site(pc, cell, element, np.asarray(frac, float), run_proto,
+                               None if combo is None else b_unit)
             recs.append({"b_lattice": combo, "b_cart_unit": [float(x) for x in b_unit], **r})
         site = {"element": element or "", "frac": [float(x) for x in frac], "multiplicity": int(mult)}
         site.update(recs[0] if len(recs) == 1 else _combine_directions(recs))
@@ -392,7 +476,8 @@ def run_material(structure_path: str | Path, proto: CCEProtocol, out_dir: str | 
         "converged": bool(good.all() and all(s["converged"] for s in per_site)),
         "label_ok": bool(np.isfinite(t2)),
         "n_sites": len(per_site), "sites": per_site, "wall_s": round(time.time() - t0, 2),
-        "isotopes": _isotopes(cell, pc, _symbols(atoms)),
+        "isotopes": _isotopes(cell, pc, symbols),
+        "n_conf_used": run_proto.n_conf, "dense_bath_share": share,
     }
     if spinful is not None:
         res["spinful_fraction"] = spinful

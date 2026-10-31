@@ -1,0 +1,41 @@
+# LAUNCHED S015 with Kian's OK (Q16b yes). Drafted S015 (T-068).
+# Results: results/cce/009-e0b-cao/ via `python scripts/fetch_cce_results.py 009-e0b-cao`.
+#
+# Purpose: CaO, the last Kanai Table S1 host without a label. In 008-e0b-dilute (run 41116974041) CaO at floors 1,000
+# (3 directions) and 2,000 (B || c) failed with `LinAlgError: Eigenvalues did not converge` inside PyCCE
+# (simple_propagator -> numpy eigh), after 205 s and 19,231 s; floor 500 (B || c) ran: 26.7 ms, n 2.15. The runner now
+# (T-068) skips a configuration that raises LinAlgError, records it with bath diagnostics (spin count, smallest
+# centre-spin and spin-spin distance; `conf_errors`) and voids the step if more than 10 % of configurations fail.
+# This run gives the CaO label if failures are rare, and the diagnostics to find the cause if not.
+#
+# Protocol: ADR-0004 as accepted (S015) = the runner defaults since T-067, written out here: S = 1/2, 5 T, Hahn echo,
+# as_delay false, CCE-2 `cce`, single rung 50/15 Å, 20 configurations, single_most_spinful site (Ca), cap 1,500,
+# floor 1,000. One direction per shard (c, a+b, a+b+c of the conventional cell): 008's floor-500 item took 1,759 s for
+# 20 configurations, so a floor-1,000 direction is expected to take about 1 h (estimate, not a result).
+# Floor convergence: B || c at floor 2,000 with 10 configurations (008's 20-configuration item ran 5.3 h before it
+# failed, close to the 6 h job limit); compare with floor 1,000 at the SEM level (seeds 1-10 are shared).
+# Supercell: as 008 (CaO 450 Å; floor 2,000: 560 Å).
+# Targets, Kanai Table S1 (SI p. 20; T2 Hahn ms, n): CaO 37.2(71) 2.84; Kanai averaged-curve fit 31.8 ms (n 2.06).
+id: 009-e0b-cao
+mode: cce
+nshards: 4
+protocol:
+  central_spin: 0.5
+  b_field_T: 5.0
+  site_rule: single_most_spinful
+  max_bath_spins: 1500
+  min_bath_spins: 1000
+  max_conf_fail_frac: 0.1
+  order: 2
+  method: cce
+  ladder: [[50.0, 15.0]]
+  n_conf: 20
+  as_delay: false
+  seed: 0
+  supercell: 450
+materials:
+  - {id: cao-c, cif: compute/structures/e0b/CaO_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[0, 0, 1]]}}
+  - {id: cao-ab, cif: compute/structures/e0b/CaO_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 0]]}}
+  - {id: cao-abc, cif: compute/structures/e0b/CaO_rocksalt_conventional.cif, protocol: {b_directions_lattice: [[1, 1, 1]]}}
+  - {id: cao-c-floor2000, cif: compute/structures/e0b/CaO_rocksalt_conventional.cif,
+     protocol: {b_directions_lattice: [[0, 0, 1]], min_bath_spins: 2000, n_conf: 10, supercell: 560}}

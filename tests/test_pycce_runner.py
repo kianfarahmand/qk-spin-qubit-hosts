@@ -11,6 +11,11 @@ import pytest
 from qkhosts.labels import pycce_runner as pr
 from qkhosts.labels.pycce_runner import CCEProtocol, run_material
 
+
+def P(**kw) -> CCEProtocol:
+    """The E0 pilot protocol (pre-ADR-0004 defaults) with overrides: most tests below were written for it."""
+    return CCEProtocol(**{**pr.E0_PROTOCOL, **kw})
+
 CALLS: list[dict] = []
 
 
@@ -62,7 +67,7 @@ SI = [("Si", np.zeros(3), 1)]
 
 def test_single_site_converges_and_fits(fake, tmp_path):
     fake({"Si": 1.0}, SI)
-    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=3), tmp_path / "out")
+    res = run_material(tmp_path / "x.cif", P(n_conf=3), tmp_path / "out")
     site = res["sites"][0]
     assert res["converged"] and site["converged"]
     assert len(site["ladder"]) == 2  # 50 -> 65 Å changes log10 T2 by < 0.02
@@ -76,7 +81,7 @@ def test_single_site_converges_and_fits(fake, tmp_path):
 
 def test_protocol_settings_reach_simulator(fake, tmp_path):
     fake({"Si": 1.0}, SI)
-    run_material(tmp_path / "x.cif", CCEProtocol(n_conf=2), tmp_path / "out")
+    run_material(tmp_path / "x.cif", P(n_conf=2), tmp_path / "out")
     kw = CALLS[0]
     assert np.allclose(kw["magnetic_field"], [0, 0, 5e4])  # 5 T in gauss
     assert kw["as_delay"] is False and kw["pulses"] == 1 and kw["order"] == 2
@@ -86,7 +91,7 @@ def test_protocol_settings_reach_simulator(fake, tmp_path):
 
 def test_window_shrinks_for_fast_decay(fake, tmp_path):
     fake({"Si": 1.0}, SI)  # 50 ms initial window, T2 ~ 1 ms -> too few fit points
-    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1), tmp_path / "out")
+    res = run_material(tmp_path / "x.cif", P(n_conf=1), tmp_path / "out")
     st = res["sites"][0]["ladder"][0]
     assert st["windows_tried_ms"][0] == 50.0 and len(st["windows_tried_ms"]) >= 2
     assert st["t_max_ms"] < 10
@@ -94,22 +99,22 @@ def test_window_shrinks_for_fast_decay(fake, tmp_path):
 
 def test_window_widens_for_slow_decay(fake, tmp_path):
     fake({"Si": 100.0}, SI)
-    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1), tmp_path / "out")
+    res = run_material(tmp_path / "x.cif", P(n_conf=1), tmp_path / "out")
     assert res["sites"][0]["ladder"][0]["t_max_ms"] > 50.0
     assert np.isfinite(res["t2_ms"])
 
 
 def test_unconverged_is_flagged(fake, tmp_path):
     fake({"Si": 1.0}, SI, r_scale=200.0, amp=5.0)  # strong r_bath dependence across the ladder
-    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1), tmp_path / "out")
+    res = run_material(tmp_path / "x.cif", P(n_conf=1), tmp_path / "out")
     assert not res["converged"]
-    assert len(res["sites"][0]["ladder"]) == len(CCEProtocol().ladder)
+    assert len(res["sites"][0]["ladder"]) == len(P().ladder)
 
 
 def test_site_average_weighted_log_mean(fake, tmp_path):
     sites = [("Si", np.zeros(3), 3), ("C", np.array([0.25, 0.25, 0.25]), 1)]
     fake({"Si": 1.0, "C": 4.0}, sites)
-    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1), tmp_path / "out")
+    res = run_material(tmp_path / "x.cif", P(n_conf=1), tmp_path / "out")
     t = [s["final"]["t2_ms"] for s in res["sites"]]
     assert res["t2_ms"] == pytest.approx(10 ** ((3 * np.log10(t[0]) + np.log10(t[1])) / 4))
     assert res["site_spread_log10"] == pytest.approx(abs(np.log10(t[1] / t[0])))
@@ -120,16 +125,16 @@ def test_site_average_weighted_log_mean(fake, tmp_path):
 def test_n_sites_max(fake, tmp_path):
     sites = [("Si", np.zeros(3), 3), ("C", np.zeros(3), 1)]
     fake({"Si": 1.0, "C": 4.0}, sites)
-    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1, n_sites_max=1), tmp_path / "out")
+    res = run_material(tmp_path / "x.cif", P(n_conf=1, n_sites_max=1), tmp_path / "out")
     assert res["n_sites"] == 1
 
 
 def test_resumable_and_json(fake, tmp_path):
     fake({"Si": 1.0}, SI)
     out = tmp_path / "out"
-    a = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=2), out)
+    a = run_material(tmp_path / "x.cif", P(n_conf=2), out)
     n = len(CALLS)
-    b = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=2), out)
+    b = run_material(tmp_path / "x.cif", P(n_conf=2), out)
     assert len(CALLS) == n  # no recomputation
     assert b["t2_ms"] == pytest.approx(a["t2_ms"]) and b["protocol_hash"] == a["protocol_hash"]
     assert json.loads((out / "x.json").read_text(encoding="utf-8"))["n_sites"] == 1
@@ -137,7 +142,7 @@ def test_resumable_and_json(fake, tmp_path):
 
 def test_ladder_reuses_window_and_seeds(fake, tmp_path):
     fake({"Si": 1.0}, SI)
-    run_material(tmp_path / "x.cif", CCEProtocol(n_conf=2), tmp_path / "out")
+    run_material(tmp_path / "x.cif", P(n_conf=2), tmp_path / "out")
     seeds = {kw["r_bath"]: [] for kw in CALLS}
     for kw in CALLS:
         seeds[kw["r_bath"]].append(kw["bath"].seed)
@@ -154,12 +159,12 @@ def test_nls_fit_recovers_stretched_exponential():
 def test_diagnostics_recorded(fake, tmp_path):
     """S011: per-config fits, NLS fit, mean curve, spins inside r_bath and the method are recorded."""
     fake({"Si": 1.0}, SI)
-    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=3, method="gcce"), tmp_path / "out")
+    res = run_material(tmp_path / "x.cif", P(n_conf=3, method="gcce"), tmp_path / "out")
     st = res["sites"][0]["final"]
     assert len(st["per_conf_t2_ms"]) == len(st["per_conf_n"]) == 3
     assert all(n == pytest.approx(2.0, abs=1e-6) for n in st["per_conf_n"])
     assert st["t2_ms_nls"] == pytest.approx(st["t2_ms"], rel=0.01)
-    assert len(st["curve_t_ms"]) == len(st["curve_mean"]) == CCEProtocol().n_t
+    assert len(st["curve_t_ms"]) == len(st["curve_mean"]) == P().n_t
     assert st["n_bath_in_rbath"] == 2  # both fake spins lie within 65 Å of the centre
     assert all(kw["method"] == "gcce" for kw in CALLS)
 
@@ -183,7 +188,7 @@ def test_origin_site_kanai_rule():
 def test_origin_rule_without_removal(fake, monkeypatch, tmp_path):
     fake({"": 1.0}, SI)
     monkeypatch.setattr(pr, "_load_origin", lambda path: (None, [(None, np.zeros(3), 1)]))
-    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=2, site_rule="origin_kanai"), tmp_path / "out")
+    res = run_material(tmp_path / "x.cif", P(n_conf=2, site_rule="origin_kanai"), tmp_path / "out")
     assert res["n_sites"] == 1 and res["sites"][0]["element"] == "" and np.isfinite(res["t2_ms"])
     assert all(np.allclose(kw["position"], 0) for kw in CALLS)
 
@@ -227,7 +232,7 @@ def test_direction_list_log_mean(monkeypatch, tmp_path):
     CALLS.clear()
     monkeypatch.setitem(sys.modules, "pycce", make_dir_fake([1.0, 2.0, 4.0]))
     monkeypatch.setattr(pr, "_load_sites", lambda path, n: (None, SI))
-    proto = CCEProtocol(n_conf=2, ladder=((50.0, 15.0),), b_directions_lattice=DIRS)
+    proto = P(n_conf=2, ladder=((50.0, 15.0),), b_directions_lattice=DIRS)
     res = run_material(tmp_path / "x.cif", proto, tmp_path / "out")
     # FakeCell is cubic: c -> z (T2 4), a+b -> (x+y)/sqrt2 (T2 1.5), a+b+c (T2 7/3)
     expect = [4.0, 1.5, 7 / 3]
@@ -250,7 +255,7 @@ def test_direction_list_log_mean(monkeypatch, tmp_path):
 
 def test_single_direction_keeps_legacy_layout(fake, tmp_path):
     fake({"Si": 1.0}, SI)
-    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1), tmp_path / "out")
+    res = run_material(tmp_path / "x.cif", P(n_conf=1), tmp_path / "out")
     site = res["sites"][0]
     assert "directions" not in site and "ladder" in site and site["b_lattice"] is None
     assert "n_directions" not in res and "spinful_fraction" not in res
@@ -258,11 +263,11 @@ def test_single_direction_keeps_legacy_layout(fake, tmp_path):
 
 def test_field_directions_use_lattice_columns():
     hexcell = types.SimpleNamespace(cell=np.array([[3.0, -1.5, 0.0], [0.0, 1.5 * np.sqrt(3), 0.0], [0.0, 0.0, 10.0]]))
-    d = pr.field_directions(hexcell, CCEProtocol(b_directions_lattice=DIRS))
+    d = pr.field_directions(hexcell, P(b_directions_lattice=DIRS))
     assert np.allclose(d[0][1], [0, 0, 1])
     assert np.allclose(d[1][1], [0.5, np.sqrt(3) / 2, 0])  # a + b of a hexagonal cell, 60° from a
     assert d[2][1][2] > 0.9  # a + b + c leans towards c for c/a = 3.33
-    assert pr.field_directions(hexcell, CCEProtocol())[0][0] is None
+    assert pr.field_directions(hexcell, P())[0][0] is None
 
 
 def test_pick_site_rule():
@@ -292,7 +297,7 @@ def test_single_most_spinful_in_runner(monkeypatch, tmp_path):
         return None, sites[:n]
 
     monkeypatch.setattr(pr, "_load_sites", load)
-    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1, site_rule="single_most_spinful"), tmp_path / "out")
+    res = run_material(tmp_path / "x.cif", P(n_conf=1, site_rule="single_most_spinful"), tmp_path / "out")
     assert seen["n"] >= len(sites)  # the rule sees every inequivalent site, not the first n_sites_max
     assert res["n_sites"] == 1 and res["sites"][0]["element"] == "Si" and res["sites"][0]["multiplicity"] == 4
     assert res["spinful_fraction"] == pytest.approx({"C": 0.0107, "Si": 0.0468})
@@ -330,7 +335,7 @@ def test_bath_cap_in_runner(monkeypatch, tmp_path):
     fk.read_ase = lambda atoms: DenseCell()
     monkeypatch.setitem(sys.modules, "pycce", fk)
     monkeypatch.setattr(pr, "_load_sites", lambda path, n: (None, [("Al", np.zeros(3), 1)]))
-    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=2, ladder=((50.0, 15.0),), max_bath_spins=10),
+    res = run_material(tmp_path / "x.cif", P(n_conf=2, ladder=((50.0, 15.0),), max_bath_spins=10),
                        tmp_path / "out")
     st = res["sites"][0]["final"]
     assert st["capped"] and st["n_bath_in_rbath_nominal"] == 50 and st["n_bath_in_rbath"] == 10
@@ -342,7 +347,7 @@ def test_bath_cap_in_runner(monkeypatch, tmp_path):
 def test_single_site_rule_refuses_without_abundances(fake, monkeypatch, tmp_path):
     fake({"Si": 1.0}, SI)  # the fake PyCCE has no common_concentrations
     with pytest.raises(RuntimeError, match="spinful"):
-        run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1, site_rule="single_most_spinful"), tmp_path / "out")
+        run_material(tmp_path / "x.cif", P(n_conf=1, site_rule="single_most_spinful"), tmp_path / "out")
 
 
 # --- S014 (T-066): bath-size floor for ultra-dilute baths, fit guard, strict host label ---
@@ -399,7 +404,7 @@ def _install_grid(monkeypatch):
 def test_bath_floor_in_runner(monkeypatch, tmp_path):
     """Too few spins inside r_bath: r_bath grows to enclose the floor and r_dipole grows with it."""
     _install_grid(monkeypatch)
-    proto = CCEProtocol(n_conf=2, ladder=((20.0, 6.0),), min_bath_spins=100)
+    proto = P(n_conf=2, ladder=((20.0, 6.0),), min_bath_spins=100)
     st = run_material(tmp_path / "x.cif", proto, tmp_path / "out")["sites"][0]["final"]
     assert st["floored"] and not st["capped"] and st["supercell_used"] == 200
     assert st["n_bath_in_rbath_nominal"] < 100 and st["n_bath_in_rbath"] == 100
@@ -410,7 +415,7 @@ def test_bath_floor_in_runner(monkeypatch, tmp_path):
 def test_bath_floor_grows_supercell(monkeypatch, tmp_path):
     """The floor does not fit inside the requested supercell: it is regenerated larger for every configuration."""
     sizes = _install_grid(monkeypatch)
-    proto = CCEProtocol(n_conf=3, ladder=((10.0, 3.0),), min_bath_spins=100, supercell=40)
+    proto = P(n_conf=3, ladder=((10.0, 3.0),), min_bath_spins=100, supercell=40)
     st = run_material(tmp_path / "x.cif", proto, tmp_path / "out")["sites"][0]["final"]
     assert st["floored"] and st["supercell_used"] > 40 and st["n_bath_in_rbath"] == 100
     assert st["r_bath_used_A"] <= pr.SUPERCELL_SAFE * st["supercell_used"]
@@ -419,7 +424,7 @@ def test_bath_floor_grows_supercell(monkeypatch, tmp_path):
 
 def test_no_floor_by_default(monkeypatch, tmp_path):
     _install_grid(monkeypatch)
-    st = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=1, ladder=((20.0, 6.0),)),
+    st = run_material(tmp_path / "x.cif", P(n_conf=1, ladder=((20.0, 6.0),)),
                       tmp_path / "out")["sites"][0]["final"]
     assert not st["floored"] and st["r_bath_used_A"] == 20.0 and st["supercell_used"] == 200
 
@@ -437,7 +442,7 @@ def test_fit_guard_voids_label(monkeypatch, tmp_path):
 
     monkeypatch.setitem(sys.modules, "pycce", types.SimpleNamespace(read_ase=lambda a: FakeCell(), Simulator=Sim))
     monkeypatch.setattr(pr, "_load_sites", lambda path, n: (None, SI))
-    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=2, ladder=((50.0, 15.0),)), tmp_path / "out")
+    res = run_material(tmp_path / "x.cif", P(n_conf=2, ladder=((50.0, 15.0),)), tmp_path / "out")
     st = res["sites"][0]["final"]
     assert st["fit_flag"] == "n_out_of_range" and np.isnan(st["t2_ms"]) and np.isnan(st["stretch_n"])
     assert all(np.isnan(st["per_conf_t2_ms"])) and st["n_fit_failed"] == 2
@@ -460,7 +465,7 @@ def test_one_bad_direction_voids_label(monkeypatch, tmp_path):
 
     monkeypatch.setitem(sys.modules, "pycce", types.SimpleNamespace(read_ase=lambda a: FakeCell(), Simulator=Sim))
     monkeypatch.setattr(pr, "_load_sites", lambda path, n: (None, SI))
-    proto = CCEProtocol(n_conf=1, ladder=((50.0, 15.0),), b_directions_lattice=DIRS)
+    proto = P(n_conf=1, ladder=((50.0, 15.0),), b_directions_lattice=DIRS)
     res = run_material(tmp_path / "x.cif", proto, tmp_path / "out")
     d = res["direction_t2_ms"]
     assert np.isnan(d[0]) and d[1] == pytest.approx(1.0, rel=1e-2) and d[2] == pytest.approx(1.0, rel=1e-2)
@@ -469,5 +474,105 @@ def test_one_bad_direction_voids_label(monkeypatch, tmp_path):
 
 def test_good_label_is_ok(fake, tmp_path):
     fake({"Si": 1.0}, SI)
-    res = run_material(tmp_path / "x.cif", CCEProtocol(n_conf=2), tmp_path / "out")
+    res = run_material(tmp_path / "x.cif", P(n_conf=2), tmp_path / "out")
     assert res["label_ok"] and res["sites"][0]["final"]["fit_flag"] == ""
+
+
+def test_defaults_are_adr0004():
+    """T-067 (S015): the production defaults are the accepted ADR-0004 protocol."""
+    p = CCEProtocol()
+    assert p.site_rule == "single_most_spinful" and p.ladder == ((50.0, 15.0),)
+    assert p.b_directions_lattice == ((0, 0, 1), (1, 1, 0), (1, 1, 1))
+    assert (p.max_bath_spins, p.min_bath_spins, p.n_conf, p.n_conf_dense) == (1500, 1000, 20, 1)
+    assert (p.central_spin, p.b_field_T, p.order, p.method, p.as_delay) == (0.5, 5.0, 2, "cce", False)
+    assert P().ladder == ((50.0, 15.0), (65.0, 20.0), (80.0, 25.0)) and P().n_conf_dense is None
+
+
+def test_dense_bath_share():
+    al2o3 = {"Al": {"27Al": 1.0}, "O": {"17O": 0.00038}}
+    s = pr.dense_bath_share({"Al": 12, "O": 18}, al2o3)  # 30-site hexagonal cell
+    assert s == pytest.approx(12 / (12 + 18 * 0.00038)) and s >= 0.99
+    assert pr.dense_bath_share({"Mg": 4, "O": 4}, {"Mg": {"25Mg": 0.10}, "O": {"17O": 0.00038}}) == 0.0
+    assert pr.dense_bath_share({"Ce": 4}, {"Ce": {}}) == 0.0  # no spinful nuclei at all
+    # a ~100 % isotope that is a minor part of the bath does not trigger the rule
+    s2 = pr.dense_bath_share({"F": 1, "X": 100}, {"F": {"19F": 1.0}, "X": {"1X": 0.5}})
+    assert s2 == pytest.approx(1 / 51)
+
+
+def test_dense_rule_in_runner(monkeypatch, tmp_path):
+    def run(conc, name):
+        CALLS.clear()
+        fk = make_fake({"Al": 1.0, "Mg": 1.0})
+        fk.common_concentrations = conc
+        monkeypatch.setitem(sys.modules, "pycce", fk)
+        el = next(iter(conc))
+        monkeypatch.setattr(pr, "_load_sites", lambda path, n: (None, [(el, np.zeros(3), 2)]))
+        monkeypatch.setattr(pr, "_symbols", lambda atoms: [el, el, "O", "O", "O"])
+        proto = P(n_conf=4, n_conf_dense=1, ladder=((50.0, 15.0),))
+        return run_material(tmp_path / "x.cif", proto, tmp_path / name), proto
+
+    res, proto = run({"Al": {"27Al": 1.0}, "O": {"17O": 0.00038}}, "dense")
+    assert res["n_conf_used"] == 1 and res["dense_bath_share"] >= 0.99
+    assert len(res["sites"][0]["final"]["per_conf_t2_ms"]) == 1
+    assert res["protocol"]["n_conf"] == 4 and res["protocol_hash"] == pr.protocol_hash(proto)  # request recorded as given
+    res, _ = run({"Mg": {"25Mg": 0.10}, "O": {"17O": 0.00038}}, "dilute")
+    assert res["n_conf_used"] == 4 and res["dense_bath_share"] == 0.0
+    assert len(res["sites"][0]["final"]["per_conf_t2_ms"]) == 4
+
+
+def test_bath_diagnostics_finds_duplicates():
+    xyz = np.array([[1.0, 0, 0], [1.0, 0, 0], [0, 3.0, 0], [0, 0, 90.0]])
+    d = np.linalg.norm(xyz, axis=1)
+    g = pr.bath_diagnostics(xyz, d, 50.0)
+    assert g == {"n_in_rbath": 3, "min_center_dist_A": 1.0, "min_pair_dist_A": 0.0}
+    assert np.isnan(pr.bath_diagnostics(xyz[:1], d[:1], 50.0)["min_pair_dist_A"])
+
+
+def _failing_fake(monkeypatch, bad_seeds):
+    """Fake PyCCE whose Simulator raises LinAlgError for the given isotope seeds (008: CaO at floor 1,000)."""
+    CALLS.clear()
+    fk = make_fake({"Si": 1.0})
+    good = fk.Simulator
+
+    class Sim(good):
+        def compute(self, ts, method, quantity):
+            if self.kw["bath"].seed in bad_seeds:
+                raise np.linalg.LinAlgError("Eigenvalues did not converge")
+            return super().compute(ts, method, quantity)
+
+    fk.Simulator = Sim
+    monkeypatch.setitem(sys.modules, "pycce", fk)
+    monkeypatch.setattr(pr, "_load_sites", lambda path, n: (None, SI))
+
+
+def test_failed_configuration_is_skipped_and_recorded(monkeypatch, tmp_path):
+    _failing_fake(monkeypatch, {3})  # seed 3 = configuration k = 2
+    res = run_material(tmp_path / "x.cif", P(n_conf=10, ladder=((50.0, 15.0),)), tmp_path / "out")
+    st = res["sites"][0]["final"]
+    assert st["n_conf_ok"] == 9 and len(st["per_conf_t2_ms"]) == 9 and st["fit_flag"] == ""
+    (e,) = st["conf_errors"]
+    assert e["conf"] == 2 and e["seed"] == 3 and e["error"].startswith("LinAlgError")
+    assert e["min_pair_dist_A"] == pytest.approx(np.sqrt(5.0)) and e["n_in_rbath"] == 2
+    assert res["label_ok"] and np.isfinite(res["t2_ms"])
+
+
+def test_failed_first_configuration_moves_window(monkeypatch, tmp_path):
+    _failing_fake(monkeypatch, {1})  # configuration 0 sets the window; it fails, so configuration 1 does
+    res = run_material(tmp_path / "x.cif", P(n_conf=10, ladder=((50.0, 15.0),)), tmp_path / "out")
+    st = res["sites"][0]["final"]
+    assert st["n_conf_ok"] == 9 and [e["conf"] for e in st["conf_errors"]] == [0]
+    assert np.isfinite(st["t2_ms"]) and res["label_ok"]
+
+
+def test_too_many_failed_configurations_void_label(monkeypatch, tmp_path):
+    _failing_fake(monkeypatch, {2, 4})  # 2 of 10 > max_conf_fail_frac 0.1
+    res = run_material(tmp_path / "x.cif", P(n_conf=10, ladder=((50.0, 15.0),)), tmp_path / "out")
+    st = res["sites"][0]["final"]
+    assert st["fit_flag"] == "conf_errors" and np.isnan(st["t2_ms"]) and not res["label_ok"]
+    assert len(st["conf_errors"]) == 2 and st["n_conf_ok"] == 8
+
+
+def test_all_configurations_failing_raises(monkeypatch, tmp_path):
+    _failing_fake(monkeypatch, set(range(1, 4)))
+    with pytest.raises(RuntimeError, match="all 3 configurations failed"):
+        run_material(tmp_path / "x.cif", P(n_conf=3, ladder=((50.0, 15.0),)), tmp_path / "out")
