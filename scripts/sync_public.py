@@ -19,10 +19,12 @@ MANIFEST = ROOT / "public" / "MANIFEST"
 OVERLAY = ROOT / "public" / "overlay"
 DENY = ["sessions/*", "STATUS.md", "tasks/*", "proposal/*", "paper/*", "prereg/preregistration.md",
         "*.env", ".env*", "*secret*", "*token*", "decisions/*", "literature/*", "CLAUDE.md", ".claude/*"]
+# Exact paths exempt from DENY, each approved by Kian (and still listed in MANIFEST to be copied).
+ALLOW_EXACT = {"decisions/ADR-0004-cce-label-protocol.md"}  # Q15 + Q17 (2026-10-31): the CCE label protocol
 
 
 def denied(rel: str) -> bool:
-    return any(fnmatch.fnmatch(rel, pat) for pat in DENY)
+    return rel not in ALLOW_EXACT and any(fnmatch.fnmatch(rel, pat) for pat in DENY)
 
 
 def main() -> int:
