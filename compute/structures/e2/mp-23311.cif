@@ -1,0 +1,52 @@
+# mp-23311 (Br2Eu) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2021-05-23T02:32:39.444000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_23311
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   7.12188010
+_cell_length_b   11.54699065
+_cell_length_c   11.54699065
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Eu1  Eu  0.14852538  0.75000000  0.75000000  1
+  Eu2  Eu  0.85147462  0.25000000  0.25000000  1
+  Eu3  Eu  0.75150154  0.60273374  0.08671271  1
+  Eu4  Eu  0.75150154  0.41328729  0.60273374  1
+  Eu5  Eu  0.75150154  0.08671271  0.89726626  1
+  Eu6  Eu  0.75150154  0.89726626  0.41328729  1
+  Eu7  Eu  0.24849846  0.39726626  0.91328729  1
+  Eu8  Eu  0.24849846  0.58671271  0.39726626  1
+  Eu9  Eu  0.24849846  0.91328729  0.10273374  1
+  Eu10  Eu  0.24849846  0.10273374  0.58671271  1
+  Br1  Br  0.50000000  0.75000000  0.25000000  1
+  Br2  Br  0.50000000  0.25000000  0.75000000  1
+  Br3  Br  0.00000000  0.75000000  0.25000000  1
+  Br4  Br  0.00000000  0.25000000  0.75000000  1
+  Br5  Br  0.90057040  0.83883900  0.95732089  1
+  Br6  Br  0.90057040  0.54267911  0.83883900  1
+  Br7  Br  0.90057040  0.95732089  0.66116100  1
+  Br8  Br  0.90057040  0.66116100  0.54267911  1
+  Br9  Br  0.09942960  0.16116100  0.04267911  1
+  Br10  Br  0.09942960  0.45732089  0.16116100  1
+  Br11  Br  0.62302071  0.15334604  0.45955203  1
+  Br12  Br  0.62302071  0.04044797  0.15334604  1
+  Br13  Br  0.62302071  0.45955203  0.34665396  1
+  Br14  Br  0.62302071  0.34665396  0.04044797  1
+  Br15  Br  0.37697929  0.84665396  0.54044797  1
+  Br16  Br  0.37697929  0.95955203  0.84665396  1
+  Br17  Br  0.37697929  0.54044797  0.65334604  1
+  Br18  Br  0.37697929  0.65334604  0.95955203  1
+  Br19  Br  0.09942960  0.33883900  0.45732089  1
+  Br20  Br  0.09942960  0.04267911  0.33883900  1

@@ -1,0 +1,44 @@
+# mp-5477 (Na5NbO5) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-04-30T04:17:34.177000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_5477
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   5.98467663
+_cell_length_b   5.98467663
+_cell_length_c   9.99778937
+_cell_angle_alpha   81.38289743
+_cell_angle_beta   81.38289743
+_cell_angle_gamma   116.81779352
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Na1  Na  0.67678048  0.99572295  0.07783717  1
+  Na2  Na  0.00427705  0.32321952  0.42216283  1
+  Na3  Na  0.78547302  0.55590527  0.95005601  1
+  Na4  Na  0.44409473  0.21452698  0.54994399  1
+  Na5  Na  0.21452698  0.44409473  0.04994399  1
+  Na6  Na  0.55590527  0.78547302  0.45005601  1
+  Na7  Na  0.66876937  0.33123063  0.25000000  1
+  Na8  Na  0.33123063  0.66876937  0.75000000  1
+  Na9  Na  0.99572295  0.67678048  0.57783717  1
+  Na10  Na  0.32321952  0.00427705  0.92216283  1
+  Nb1  Nb  0.09169842  0.90830158  0.25000000  1
+  Nb2  Nb  0.90830158  0.09169842  0.75000000  1
+  O1  O  0.09582328  0.90417672  0.75000000  1
+  O2  O  0.90417672  0.09582328  0.25000000  1
+  O3  O  0.69494023  0.03673595  0.61702573  1
+  O4  O  0.96326405  0.30505977  0.88297427  1
+  O5  O  0.40696106  0.19183322  0.10292391  1
+  O6  O  0.80816678  0.59303894  0.39707609  1
+  O7  O  0.59303894  0.80816678  0.89707609  1
+  O8  O  0.19183322  0.40696106  0.60292391  1
+  O9  O  0.30505977  0.96326405  0.38297427  1
+  O10  O  0.03673595  0.69494023  0.11702573  1

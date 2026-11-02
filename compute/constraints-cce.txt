@@ -3,3 +3,6 @@
 numpy<2
 scipy<1.12
 pandas<3
+# S020 (T-015): E2 items convert each CIF to pymatgen's conventional standard cell (cell_setting), which fixes the
+# field directions; pin the version every run so far resolved to (records of 004-011), so the frame cannot drift.
+pymatgen==2024.5.1

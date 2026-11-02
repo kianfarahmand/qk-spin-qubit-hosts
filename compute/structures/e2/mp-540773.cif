@@ -1,0 +1,50 @@
+# mp-540773 (Ca2GeS4) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-04-30T00:32:47.099000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_540773
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   6.32883526
+_cell_length_b   8.22427351
+_cell_length_c   13.73188832
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Ca1  Ca  0.00000000  0.00000000  0.00000000  1
+  Ca2  Ca  0.50000000  0.00000000  0.50000000  1
+  Ca3  Ca  0.00000000  0.50000000  0.00000000  1
+  Ca4  Ca  0.50000000  0.50000000  0.50000000  1
+  Ca5  Ca  0.48330933  0.75000000  0.22663926  1
+  Ca6  Ca  0.98330933  0.25000000  0.27336074  1
+  Ca7  Ca  0.51669067  0.25000000  0.77336074  1
+  Ca8  Ca  0.01669067  0.75000000  0.72663926  1
+  Ge1  Ge  0.90813823  0.75000000  0.40686956  1
+  Ge2  Ge  0.40813823  0.25000000  0.09313044  1
+  Ge3  Ge  0.09186177  0.25000000  0.59313044  1
+  Ge4  Ge  0.59186177  0.75000000  0.90686956  1
+  S1  S  0.77193337  0.75000000  0.55691211  1
+  S2  S  0.27193337  0.25000000  0.94308789  1
+  S3  S  0.22806663  0.25000000  0.44308789  1
+  S4  S  0.72806663  0.75000000  0.05691211  1
+  S5  S  0.25536853  0.75000000  0.40691290  1
+  S6  S  0.75536853  0.25000000  0.09308710  1
+  S7  S  0.74463147  0.25000000  0.59308710  1
+  S8  S  0.24463147  0.75000000  0.90691290  1
+  S9  S  0.76081090  0.96182981  0.33167948  1
+  S10  S  0.26081090  0.03817019  0.16832052  1
+  S11  S  0.23918910  0.46182981  0.66832052  1
+  S12  S  0.73918910  0.53817019  0.83167948  1
+  S13  S  0.23918910  0.03817019  0.66832052  1
+  S14  S  0.73918910  0.96182981  0.83167948  1
+  S15  S  0.76081090  0.53817019  0.33167948  1
+  S16  S  0.26081090  0.46182981  0.16832052  1

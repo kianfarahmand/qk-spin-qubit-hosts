@@ -9,6 +9,7 @@ Request file (YAML):
     nshards: 1                  # parallel jobs (<= 20 run concurrently on GitHub Free)
     protocol: {...}             # CCEProtocol overrides (mode cce)
     materials:                  # mode cce: list of {id, cif} (cif path relative to repo root)
+                                # optional per item: shard (explicit packing, S020); other keys are metadata
       - {id: mp-149, cif: compute/structures/mp-149.cif}
       - {id: mp-149-gcce, cif: compute/structures/mp-149.cif, protocol: {method: gcce}}  # per-item overrides
 
@@ -36,7 +37,7 @@ from qkhosts.labels.pycce_runner import CCEProtocol, fit_t2, protocol_hash, run_
 def _versions() -> dict:
     out = {"python": platform.python_version(), "platform": platform.platform()}
     from importlib import metadata
-    for m in ("numpy", "scipy", "pycce", "ase", "pymatgen"):
+    for m in ("numpy", "scipy", "pycce", "ase", "pymatgen", "spglib"):
         try:
             out[m] = metadata.version(m)
         except metadata.PackageNotFoundError:
@@ -121,6 +122,19 @@ def _protocol(req: dict, item: dict | None = None) -> CCEProtocol:
     return CCEProtocol(**over)
 
 
+def shard_items(materials: list[dict], shard: int, nshards: int) -> list[dict]:
+    """Items of one shard: an item's explicit `shard` key (S020, cost-packed E2 requests) or, without one,
+    round-robin by position (`materials[shard::nshards]`, as for every request before S020)."""
+    out = []
+    for i, it in enumerate(materials):
+        s = it.get("shard", i % nshards)
+        if not 0 <= int(s) < nshards:
+            raise ValueError(f"item {it.get('id')}: shard {s} outside 0..{nshards - 1}")
+        if int(s) == shard:
+            out.append(it)
+    return out
+
+
 def run_shard(req: dict, shard: int, nshards: int, out: Path, root: Path) -> int:
     out.mkdir(parents=True, exist_ok=True)
     path = out / f"shard_{shard}.jsonl"
@@ -130,7 +144,7 @@ def run_shard(req: dict, shard: int, nshards: int, out: Path, root: Path) -> int
             f.write(json.dumps(rec, default=str) + "\n")
             print(json.dumps(rec, indent=1, default=str))
             return 0
-        items = req.get("materials", [])[shard::nshards]
+        items = shard_items(req.get("materials", []), shard, nshards)
         host = host_info()
         for it in items:
             t0 = time.time()

@@ -1,0 +1,54 @@
+# mp-17638 (Rb3SbSe4) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-04-30T00:19:58.049000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_17638
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   9.96770840
+_cell_length_b   10.35305399
+_cell_length_c   11.57175110
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Rb1  Rb  0.93439420  0.30180717  0.95547279  1
+  Rb2  Rb  0.43439420  0.19819283  0.95547279  1
+  Rb3  Rb  0.56560580  0.80180717  0.45547279  1
+  Rb4  Rb  0.06560580  0.69819283  0.04452721  1
+  Rb5  Rb  0.13799649  0.91892426  0.75000000  1
+  Rb6  Rb  0.63799649  0.58107574  0.75000000  1
+  Rb7  Rb  0.36200351  0.41892426  0.25000000  1
+  Rb8  Rb  0.86200351  0.08107574  0.25000000  1
+  Rb9  Rb  0.06560580  0.69819283  0.45547279  1
+  Rb10  Rb  0.43439420  0.19819283  0.54452721  1
+  Rb11  Rb  0.56560580  0.80180717  0.04452721  1
+  Rb12  Rb  0.93439420  0.30180717  0.54452721  1
+  Sb1  Sb  0.77831075  0.52038256  0.25000000  1
+  Sb2  Sb  0.27831075  0.97961744  0.25000000  1
+  Sb3  Sb  0.72168925  0.02038256  0.75000000  1
+  Sb4  Sb  0.22168925  0.47961744  0.75000000  1
+  Se1  Se  0.65022542  0.46702088  0.07199490  1
+  Se2  Se  0.15022542  0.03297912  0.42800510  1
+  Se3  Se  0.84977458  0.96702088  0.92800510  1
+  Se4  Se  0.34977458  0.53297912  0.57199490  1
+  Se5  Se  0.34977458  0.53297912  0.92800510  1
+  Se6  Se  0.84977458  0.96702088  0.57199490  1
+  Se7  Se  0.15022542  0.03297912  0.07199490  1
+  Se8  Se  0.65022542  0.46702088  0.42800510  1
+  Se9  Se  0.00131559  0.59516508  0.75000000  1
+  Se10  Se  0.50131559  0.90483492  0.75000000  1
+  Se11  Se  0.49868441  0.09516508  0.25000000  1
+  Se12  Se  0.99868441  0.40483492  0.25000000  1
+  Se13  Se  0.17832637  0.24309391  0.75000000  1
+  Se14  Se  0.82167363  0.75690609  0.25000000  1
+  Se15  Se  0.32167363  0.74309391  0.25000000  1
+  Se16  Se  0.67832637  0.25690609  0.75000000  1

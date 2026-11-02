@@ -1,0 +1,32 @@
+# mp-3771 (MgO3Ti) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2023-03-11T04:05:03.162000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_3771
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   5.47098129
+_cell_length_b   5.47098195
+_cell_length_c   5.47098181
+_cell_angle_alpha   55.07158166
+_cell_angle_beta   55.07158285
+_cell_angle_gamma   55.07157571
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Mg1  Mg  0.35510852  0.35510852  0.35510852  1
+  Mg2  Mg  0.64489148  0.64489148  0.64489148  1
+  Ti1  Ti  0.14466426  0.14466426  0.14466426  1
+  Ti2  Ti  0.85533574  0.85533574  0.85533574  1
+  O1  O  0.04808923  0.77334705  0.43816702  1
+  O2  O  0.77334705  0.43816702  0.04808923  1
+  O3  O  0.43816702  0.04808923  0.77334705  1
+  O4  O  0.95191077  0.22665295  0.56183298  1
+  O5  O  0.56183298  0.95191077  0.22665295  1
+  O6  O  0.22665295  0.56183298  0.95191077  1

@@ -1,0 +1,50 @@
+# mp-865865 (Er2S4Yb) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-06-09T23:17:01.551000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_865865
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   3.83577297
+_cell_length_b   12.79121153
+_cell_length_c   12.96191429
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Yb1  Yb  0.75000000  0.86942283  0.41716012  1
+  Yb2  Yb  0.25000000  0.63057717  0.91716012  1
+  Yb3  Yb  0.75000000  0.36942283  0.08283988  1
+  Yb4  Yb  0.25000000  0.13057717  0.58283988  1
+  Er1  Er  0.75000000  0.60771198  0.58374522  1
+  Er2  Er  0.25000000  0.89228802  0.08374522  1
+  Er3  Er  0.75000000  0.10771198  0.91625478  1
+  Er4  Er  0.25000000  0.39228802  0.41625478  1
+  Er5  Er  0.75000000  0.64649829  0.20200498  1
+  Er6  Er  0.25000000  0.85350171  0.70200498  1
+  Er7  Er  0.75000000  0.14649829  0.29799502  1
+  Er8  Er  0.25000000  0.35350171  0.79799502  1
+  S1  S  0.75000000  0.97085894  0.61625671  1
+  S2  S  0.25000000  0.52914106  0.11625671  1
+  S3  S  0.75000000  0.47085894  0.88374329  1
+  S4  S  0.25000000  0.02914106  0.38374329  1
+  S5  S  0.75000000  0.71677012  0.76395260  1
+  S6  S  0.25000000  0.78322988  0.26395260  1
+  S7  S  0.75000000  0.21677012  0.73604740  1
+  S8  S  0.25000000  0.28322988  0.23604740  1
+  S9  S  0.75000000  0.53418704  0.38209538  1
+  S10  S  0.25000000  0.96581296  0.88209538  1
+  S11  S  0.75000000  0.03418704  0.11790462  1
+  S12  S  0.25000000  0.46581296  0.61790462  1
+  S13  S  0.75000000  0.75631519  0.02472361  1
+  S14  S  0.25000000  0.74368481  0.52472361  1
+  S15  S  0.75000000  0.25631519  0.47527639  1
+  S16  S  0.25000000  0.24368481  0.97527639  1

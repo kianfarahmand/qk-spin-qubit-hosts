@@ -1,0 +1,40 @@
+# mp-1209848 (Nd2O5Pd2) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2021-03-14T08:20:54.916000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_1209848
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   6.59447375
+_cell_length_b   6.59447375
+_cell_length_c   5.57725277
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Nd1  Nd  0.10682027  0.26116576  0.00000000  1
+  Nd2  Nd  0.89317973  0.73883424  0.00000000  1
+  Nd3  Nd  0.26116576  0.89317973  0.50000000  1
+  Nd4  Nd  0.73883424  0.10682027  0.50000000  1
+  Pd1  Pd  0.59618890  0.30535622  0.00000000  1
+  Pd2  Pd  0.40381110  0.69464378  0.00000000  1
+  Pd3  Pd  0.30535622  0.40381110  0.50000000  1
+  Pd4  Pd  0.69464378  0.59618890  0.50000000  1
+  O1  O  0.40260136  0.19607480  0.25843826  1
+  O2  O  0.59739864  0.80392520  0.74156174  1
+  O3  O  0.59739864  0.80392520  0.25843826  1
+  O4  O  0.19607480  0.59739864  0.75843826  1
+  O5  O  0.40260136  0.19607480  0.74156174  1
+  O6  O  0.80392520  0.40260136  0.24156174  1
+  O7  O  0.80392520  0.40260136  0.75843826  1
+  O8  O  0.19607480  0.59739864  0.24156174  1
+  O9  O  0.00000000  0.00000000  0.25000000  1
+  O10  O  0.00000000  0.00000000  0.75000000  1

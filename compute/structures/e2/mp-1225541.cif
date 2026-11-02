@@ -1,0 +1,27 @@
+# mp-1225541 (Er2S2Te) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-06-09T08:35:20.506000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_1225541
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   7.45324113
+_cell_length_b   7.45324113
+_cell_length_c   7.45324113
+_cell_angle_alpha   147.79363051
+_cell_angle_beta   138.35025005
+_cell_angle_gamma   53.60453029
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Er1  Er  0.83277311  0.33277311  0.50000000  1
+  Er2  Er  0.16722689  0.66722689  0.50000000  1
+  Te1  Te  0.00000000  0.00000000  0.00000000  1
+  S1  S  0.70231788  0.70231788  0.00000000  1
+  S2  S  0.29768212  0.29768212  0.00000000  1

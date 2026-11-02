@@ -1,0 +1,54 @@
+# mp-1203208 (Cs3CuHf2Te10) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2021-02-05T22:05:04.565000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_1203208
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   10.21424300
+_cell_length_b   11.26824704
+_cell_length_c   11.48303144
+_cell_angle_alpha   89.54039934
+_cell_angle_beta   89.33461137
+_cell_angle_gamma   78.12013890
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Cs1  Cs  0.88457400  0.89109100  0.26148000  1
+  Cs2  Cs  0.11542600  0.10890900  0.73852000  1
+  Cs3  Cs  0.44547700  0.76434900  0.38999900  1
+  Cs4  Cs  0.55452300  0.23565100  0.61000100  1
+  Cs5  Cs  0.30053400  0.62495500  0.89599600  1
+  Cs6  Cs  0.69946600  0.37504500  0.10400400  1
+  Hf1  Hf  0.10756400  0.37729400  0.36426400  1
+  Hf2  Hf  0.89243600  0.62270600  0.63573600  1
+  Hf3  Hf  0.30784100  0.15942700  0.14292600  1
+  Hf4  Hf  0.69215900  0.84057300  0.85707400  1
+  Cu1  Cu  0.92121800  0.37810200  0.55604500  1
+  Cu2  Cu  0.07878200  0.62189800  0.44395500  1
+  Te1  Te  0.84351600  0.55950100  0.39890200  1
+  Te2  Te  0.15648400  0.44049900  0.60109800  1
+  Te3  Te  0.92831700  0.20722700  0.40637000  1
+  Te4  Te  0.07168300  0.79277300  0.59363000  1
+  Te5  Te  0.19291100  0.58882700  0.24180900  1
+  Te6  Te  0.80708900  0.41117300  0.75819100  1
+  Te7  Te  0.21453700  0.11752700  0.39079000  1
+  Te8  Te  0.78546300  0.88247300  0.60921000  1
+  Te9  Te  0.07998200  0.36306700  0.10975200  1
+  Te10  Te  0.92001800  0.63693300  0.89024800  1
+  Te11  Te  0.39032700  0.35746600  0.29021400  1
+  Te12  Te  0.60967300  0.64253400  0.70978600  1
+  Te13  Te  0.04436200  0.12226800  0.06808300  1
+  Te14  Te  0.95563800  0.87773200  0.93191700  1
+  Te15  Te  0.52381200  0.09091900  0.30349600  1
+  Te16  Te  0.47618800  0.90908100  0.69650400  1
+  Te17  Te  0.33175400  0.91281200  0.07046900  1
+  Te18  Te  0.66824600  0.08718800  0.92953100  1
+  Te19  Te  0.40885400  0.24504100  0.93074900  1
+  Te20  Te  0.59114600  0.75495900  0.06925100  1

@@ -1,0 +1,30 @@
+# mp-2437 (F3Ir) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-09-16T22:04:39.826000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_2437
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   5.39411948
+_cell_length_b   5.39412001
+_cell_length_c   5.39411979
+_cell_angle_alpha   54.73001631
+_cell_angle_beta   54.73001400
+_cell_angle_gamma   54.73001047
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Ir1  Ir  0.50000000  0.50000000  0.50000000  1
+  Ir2  Ir  0.00000000  0.00000000  0.00000000  1
+  F1  F  0.42087196  0.75000000  0.07912804  1
+  F2  F  0.75000000  0.07912804  0.42087196  1
+  F3  F  0.92087196  0.57912804  0.25000000  1
+  F4  F  0.25000000  0.92087196  0.57912804  1
+  F5  F  0.57912804  0.25000000  0.92087196  1
+  F6  F  0.07912804  0.42087196  0.75000000  1

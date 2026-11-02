@@ -1,0 +1,50 @@
+# mp-24294 (ClHHgO4) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-06-14T12:55:50.658000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_24294
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   4.77626900
+_cell_length_b   7.38510100
+_cell_length_c   11.69828700
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Hg1  Hg  0.43809600  0.50000000  0.25000000  1
+  Hg2  Hg  0.56190400  0.00000000  0.75000000  1
+  Hg3  Hg  0.56190400  0.50000000  0.75000000  1
+  Hg4  Hg  0.43809600  0.00000000  0.25000000  1
+  H1  H  0.44961900  0.75000000  0.59417200  1
+  H2  H  0.44961900  0.25000000  0.90582800  1
+  H3  H  0.55038100  0.25000000  0.40582800  1
+  H4  H  0.55038100  0.75000000  0.09417200  1
+  Cl1  Cl  0.99380700  0.75000000  0.93818200  1
+  Cl2  Cl  0.99380700  0.25000000  0.56181800  1
+  Cl3  Cl  0.00619300  0.25000000  0.06181800  1
+  Cl4  Cl  0.00619300  0.75000000  0.43818200  1
+  O1  O  0.42546700  0.75000000  0.16282100  1
+  O2  O  0.42546700  0.25000000  0.33717900  1
+  O3  O  0.57453300  0.25000000  0.83717900  1
+  O4  O  0.57453300  0.75000000  0.66282100  1
+  O5  O  0.94496700  0.41494100  0.13305300  1
+  O6  O  0.94496700  0.58505900  0.36694700  1
+  O7  O  0.05503300  0.91494100  0.86694700  1
+  O8  O  0.05503300  0.08505900  0.63305300  1
+  O9  O  0.32268400  0.75000000  0.45526100  1
+  O10  O  0.32268400  0.25000000  0.04473900  1
+  O11  O  0.67731600  0.25000000  0.54473900  1
+  O12  O  0.67731600  0.75000000  0.95526100  1
+  O13  O  0.94496700  0.91494100  0.36694700  1
+  O14  O  0.94496700  0.08505900  0.13305300  1
+  O15  O  0.05503300  0.41494100  0.63305300  1
+  O16  O  0.05503300  0.58505900  0.86694700  1

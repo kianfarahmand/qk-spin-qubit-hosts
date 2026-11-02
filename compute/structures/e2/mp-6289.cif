@@ -1,0 +1,48 @@
+# mp-6289 (Ba2Ge2O8Ti) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2021-02-16T13:22:20.476000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_6289
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   8.84839800
+_cell_length_b   8.84839800
+_cell_length_c   5.48720300
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Ba1  Ba  0.82814500  0.32814500  0.01554400  1
+  Ba2  Ba  0.32814500  0.17185500  0.01554400  1
+  Ba3  Ba  0.17185500  0.67185500  0.01554400  1
+  Ba4  Ba  0.67185500  0.82814500  0.01554400  1
+  Ti1  Ti  0.00000000  0.00000000  0.45359400  1
+  Ti2  Ti  0.50000000  0.50000000  0.45359400  1
+  Ge1  Ge  0.63229900  0.13229900  0.49148800  1
+  Ge2  Ge  0.13229900  0.36770100  0.49148800  1
+  Ge3  Ge  0.36770100  0.86770100  0.49148800  1
+  Ge4  Ge  0.86770100  0.63229900  0.49148800  1
+  O1  O  0.00000000  0.00000000  0.76363800  1
+  O2  O  0.50000000  0.50000000  0.76363800  1
+  O3  O  0.87190600  0.62809400  0.80627700  1
+  O4  O  0.12809400  0.37190600  0.80627700  1
+  O5  O  0.08085300  0.19851200  0.34133400  1
+  O6  O  0.69851200  0.58085300  0.34133400  1
+  O7  O  0.30148800  0.41914700  0.34133400  1
+  O8  O  0.50000000  0.00000000  0.35403400  1
+  O9  O  0.80148800  0.08085300  0.34133400  1
+  O10  O  0.19851200  0.91914700  0.34133400  1
+  O11  O  0.58085300  0.30148800  0.34133400  1
+  O12  O  0.41914700  0.69851200  0.34133400  1
+  O13  O  0.91914700  0.80148800  0.34133400  1
+  O14  O  0.00000000  0.50000000  0.35403400  1
+  O15  O  0.62809400  0.12809400  0.80627700  1
+  O16  O  0.37190600  0.87190600  0.80627700  1

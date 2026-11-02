@@ -1,0 +1,26 @@
+# mp-7046 (DyRbS2) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-09-20T21:31:13.474000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_7046
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   8.00336143
+_cell_length_b   8.00336143
+_cell_length_c   8.00336095
+_cell_angle_alpha   29.37970466
+_cell_angle_beta   29.37970466
+_cell_angle_gamma   29.37970520
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Rb1  Rb  0.00000000  0.00000000  0.00000000  1
+  Dy1  Dy  0.50000000  0.50000000  0.50000000  1
+  S1  S  0.76926143  0.76926143  0.76926143  1
+  S2  S  0.23073857  0.23073857  0.23073857  1

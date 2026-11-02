@@ -53,3 +53,19 @@ def test_isotopes_from_table():
     iso = pd.DataFrame([("Ga", "69Ga", 0.6, 1.5), ("Ga", "71Ga", 0.4, 1.5), ("O", "16O", 0.99, 0.0),
                         ("P", "31P", 1.0, 0.5)], columns=["element", "isotope", "abundance", "spin_I"])
     assert isotopes_from_table(iso, ["Ga", "O"]) == {"Ga": {"69Ga": 0.6, "71Ga": 0.4}}
+
+
+def test_dipole_ratio_and_host_eval_seconds():
+    from qkhosts.labels.cost import dipole_ratio, host_eval_seconds
+
+    assert dipole_ratio(20000, 1500) == pytest.approx(0.3)  # ADR-0004: radii scale together
+    # GaP-like: 25,770 nominal -> 1,500 gives r_bath 19.3 Å; an 8 Å r_dipole floor -> ratio 8 / 19.3
+    r_bath = 50.0 * (1500 / 25770) ** (1 / 3)
+    assert dipole_ratio(25770, 1500, 8.0) == pytest.approx(8.0 / r_bath)
+    assert dipole_ratio(1000, 1000, 8.0) == pytest.approx(0.3)  # floor below 15 Å: no effect at 50/15
+    assert dipole_ratio(1e7, 1000, 50.0) == 1.0  # never above r_bath
+    prm = {"a": 1e-6, "b": 1e-5, "p": 2.0}
+    f, d = np.array([1.0]), np.array([2.0])
+    base = host_eval_seconds(prm, f, d, 25770, 1000, 1500, 16.0)
+    assert base == pytest.approx(eval_seconds(prm, n_pairs(1500), 16.0, supercell_spins(25770, 1000, 16.0)))
+    assert host_eval_seconds(prm, f, d, 25770, 1000, 1500, 16.0, min_r_dipole_A=8.0) > base

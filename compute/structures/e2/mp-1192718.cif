@@ -1,0 +1,50 @@
+# mp-1192718 (Cl6H5O2Sb) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-06-10T13:54:03.846000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_1192718
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   7.07866045
+_cell_length_b   7.07866045
+_cell_length_c   13.56446826
+_cell_angle_alpha   69.46092184
+_cell_angle_beta   69.46092184
+_cell_angle_gamma   61.49240627
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Sb1  Sb  0.50000000  0.00000000  0.50000000  1
+  Sb2  Sb  0.00000000  0.50000000  0.00000000  1
+  H1  H  0.71842400  0.28157600  0.75000000  1
+  H2  H  0.28157600  0.71842400  0.25000000  1
+  H3  H  0.69459200  0.13099500  0.66686900  1
+  H4  H  0.86900500  0.30540800  0.83313100  1
+  H5  H  0.30540800  0.86900500  0.33313100  1
+  H6  H  0.13099500  0.69459200  0.16686900  1
+  H7  H  0.77226400  0.32964100  0.60076600  1
+  H8  H  0.67035900  0.22773600  0.89923400  1
+  H9  H  0.22773600  0.67035900  0.39923400  1
+  H10  H  0.32964100  0.77226400  0.10076600  1
+  Cl1  Cl  0.23454500  0.32731500  0.56757700  1
+  Cl2  Cl  0.67268500  0.76545500  0.93242300  1
+  Cl3  Cl  0.76545500  0.67268500  0.43242300  1
+  Cl4  Cl  0.32731500  0.23454500  0.06757700  1
+  Cl5  Cl  0.34285400  0.14875800  0.34123800  1
+  Cl6  Cl  0.85124200  0.65714600  0.15876200  1
+  Cl7  Cl  0.65714600  0.85124200  0.65876200  1
+  Cl8  Cl  0.14875800  0.34285400  0.84123800  1
+  Cl9  Cl  0.24622900  0.82772500  0.59241800  1
+  Cl10  Cl  0.17227500  0.75377100  0.90758200  1
+  Cl11  Cl  0.75377100  0.17227500  0.40758200  1
+  Cl12  Cl  0.82772500  0.24622900  0.09241800  1
+  O1  O  0.68750900  0.27330200  0.66953800  1
+  O2  O  0.72669800  0.31249100  0.83046200  1
+  O3  O  0.31249100  0.72669800  0.33046200  1
+  O4  O  0.27330200  0.68750900  0.16953800  1

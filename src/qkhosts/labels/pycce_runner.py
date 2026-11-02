@@ -10,6 +10,8 @@ Settings come from the T-005 literature read (S005; `literature/notes/kanai2022_
 - Field direction: one Cartesian `b_direction`, or (ADR-0004 item 2, option A, S013) a list
   `b_directions_lattice` of lattice-vector combinations of the CIF cell, which is the conventional
   cell (c, a+b, a+b+c = (0,0,1), (1,1,0), (1,1,1)); the host label is the log-mean over directions.
+  E2 (S020): `cell_setting="conventional_standard"` converts the CIF to pymatgen's conventional standard
+  cell before anything else, so the CIFs can stay MP's own cells (E1 snapshot) for any crystal system.
 - Bath-size cap (ADR-0004 item 5, S013): `max_bath_spins` shrinks r_bath for dense baths (see `cap_radii`).
 - Bath-size floor (T-066, S014): `min_bath_spins` grows r_bath (and the supercell) for ultra-dilute baths
   until that many spins sit inside (see `floor_radii`); r_dipole grows by the same factor.
@@ -55,6 +57,7 @@ class CCEProtocol:
     max_bath_spins: int | None = 1500   # cap on spins inside r_bath (dense baths); None = no cap
     min_bath_spins: int | None = 1000   # floor on spins inside r_bath (ultra-dilute baths; provisional until 008)
     min_r_dipole_A: float | None = None  # S019: lower bound on r_dipole after cap/floor (011 cap check); None = ADR-0004
+    cell_setting: str | None = None     # S020 (E2): "conventional_standard" = pymatgen conventional standard cell; None = CIF as is
     store_conf_curves: bool = False     # S019 (T-015): keep every configuration's curve, for merging chunks (`chunks`)
     fit_n_range: tuple = (0.5, 6.0)     # accepted stretch exponents (fit guard)
     max_conf_fail_frac: float = 0.1     # T-068: more failed (LinAlgError) configurations than this voids the step
@@ -116,14 +119,27 @@ def n_fit_points(coherence: np.ndarray) -> int:
     return int(((L > 0.05) & (L < 0.95)).sum())
 
 
-def _load_sites(structure_path: str | Path, n_sites_max: int):  # pragma: no cover - needs pymatgen
+CELL_SETTINGS = (None, "conventional_standard")
+
+
+def check_cell_setting(setting: str | None) -> str | None:
+    """Validate `CCEProtocol.cell_setting` (None keeps the CIF cell)."""
+    if setting not in CELL_SETTINGS:
+        raise ValueError(f"cell_setting must be one of {CELL_SETTINGS}, got {setting!r}")
+    return setting
+
+
+def _load_sites(structure_path: str | Path, n_sites_max: int, setting: str | None = None):  # pragma: no cover - needs pymatgen
     """Return (ase Atoms, [(element, frac_xyz, multiplicity), ...]) for up to n_sites_max
-    symmetry-inequivalent sites, most frequent first."""
+    symmetry-inequivalent sites, most frequent first. setting "conventional_standard" first converts the
+    structure to pymatgen's conventional standard cell (SpacegroupAnalyzer defaults: symprec 0.01 Å, 5°)."""
     from pymatgen.core import Structure
     from pymatgen.io.ase import AseAtomsAdaptor
     from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
 
     s = Structure.from_file(str(structure_path))
+    if check_cell_setting(setting) == "conventional_standard":
+        s = SpacegroupAnalyzer(s).get_conventional_standard_structure()
     groups = SpacegroupAnalyzer(s).get_symmetrized_structure().equivalent_indices
     groups = sorted(groups, key=lambda g: (-len(g), g[0]))[:n_sites_max]
     sites = [(s[g[0]].specie.symbol, np.asarray(s[g[0]].frac_coords, float), len(g)) for g in groups]
@@ -441,16 +457,19 @@ def run_material(structure_path: str | Path, proto: CCEProtocol, out_dir: str | 
         raise ImportError("install extras: pip install -e .[cce]") from e
     t0 = time.time()
     spinful = None
+    setting = {"setting": check_cell_setting(proto.cell_setting)} if proto.cell_setting else {}
     if proto.site_rule == "origin_kanai":
+        if setting:
+            raise ValueError("origin_kanai uses the CIF origin; cell_setting must be None")
         atoms, sites = _load_origin(structure_path)
     elif proto.site_rule == "single_most_spinful":
-        atoms, sites = _load_sites(structure_path, 10 ** 6)
+        atoms, sites = _load_sites(structure_path, 10 ** 6, **setting)
         spinful = _spinful_fractions(pc, sorted({el for el, _, _ in sites}))
         if not any(v > 0 for v in spinful.values()):  # table not found: never pick a site blindly
             raise RuntimeError(f"no spinful-isotope abundances from PyCCE for {sorted(spinful)}")
         sites = [pick_site(sites, spinful)]
     else:
-        atoms, sites = _load_sites(structure_path, proto.n_sites_max)
+        atoms, sites = _load_sites(structure_path, proto.n_sites_max, **setting)
     cell = pc.read_ase(atoms) if hasattr(pc, "read_ase") else pc.BathCell.from_ase(atoms)
     dirs = field_directions(cell, proto)
     run_proto, share = proto, None
@@ -484,6 +503,8 @@ def run_material(structure_path: str | Path, proto: CCEProtocol, out_dir: str | 
         "isotopes": _isotopes(cell, pc, symbols),
         "n_conf_used": run_proto.n_conf, "dense_bath_share": share,
     }
+    if getattr(cell, "cell", None) is not None:  # S020: the lattice the field directions refer to (Å, columns)
+        res["cell_A"] = np.asarray(cell.cell, float).tolist()
     if spinful is not None:
         res["spinful_fraction"] = spinful
     if len(dirs) > 1:
@@ -562,7 +583,7 @@ def protocol_hash(proto: CCEProtocol) -> str:
     """12-hex hash of the protocol. Fields added later are left out while unset, so earlier hashes stay valid."""
     import hashlib
     d = asdict(proto)
-    for k, unset in (("min_r_dipole_A", None), ("store_conf_curves", False)):  # S019
+    for k, unset in (("min_r_dipole_A", None), ("store_conf_curves", False), ("cell_setting", None)):  # S019, S020
         if d.get(k, unset) == unset:
             d.pop(k, None)
     return hashlib.sha256(json.dumps(d, sort_keys=True, default=list).encode()).hexdigest()[:12]

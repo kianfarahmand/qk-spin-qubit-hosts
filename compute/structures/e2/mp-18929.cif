@@ -1,0 +1,49 @@
+# mp-18929 (BaO6V2) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-04-30T03:54:21.623000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_18929
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   7.64205356
+_cell_length_b   7.64202934
+_cell_length_c   7.96181936
+_cell_angle_alpha   90.00006844
+_cell_angle_beta   89.99989606
+_cell_angle_gamma   112.29047396
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Ba1  Ba  0.83690180  0.16309737  0.49999904  1
+  Ba2  Ba  0.16309677  0.83690226  0.50000078  1
+  Ba3  Ba  0.00000000  0.00000044  0.00000000  1
+  V1  V  0.00000062  0.50000107  0.93517282  1
+  V2  V  0.50000109  0.00000000  0.06483085  1
+  V3  V  0.25095201  0.39768292  0.25999363  1
+  V4  V  0.74904736  0.60231669  0.25999413  1
+  V5  V  0.60231519  0.74904936  0.74000511  1
+  V6  V  0.39768329  0.25094991  0.74000629  1
+  O1  O  0.85745335  0.59101136  0.06195898  1
+  O2  O  0.14254648  0.40898973  0.06195825  1
+  O3  O  0.59101019  0.85745313  0.93804153  1
+  O4  O  0.40898645  0.14254418  0.93804261  1
+  O5  O  0.82796049  0.50775119  0.41334465  1
+  O6  O  0.17203871  0.49224735  0.41334549  1
+  O7  O  0.50774998  0.82796128  0.58665313  1
+  O8  O  0.49224942  0.17203927  0.58665328  1
+  O9  O  0.13187557  0.68166422  0.81835464  1
+  O10  O  0.49999914  0.49999992  0.75495511  1
+  O11  O  0.50000022  0.50000019  0.24504476  1
+  O12  O  0.16542988  0.16854244  0.69983326  1
+  O13  O  0.83456914  0.83145708  0.69983305  1
+  O14  O  0.86812442  0.31833557  0.81835417  1
+  O15  O  0.83145572  0.83457100  0.30016441  1
+  O16  O  0.31834581  0.86812213  0.18165415  1
+  O17  O  0.68167043  0.13188117  0.18164202  1
+  O18  O  0.16854459  0.16542884  0.30016417  1

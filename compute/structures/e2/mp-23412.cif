@@ -1,0 +1,46 @@
+# mp-23412 (Cl4FSb) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-06-10T00:39:11.208000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_23412
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   10.06789933
+_cell_length_b   10.06874623
+_cell_length_c   10.07252722
+_cell_angle_alpha   99.00528262
+_cell_angle_beta   98.97335864
+_cell_angle_gamma   133.41444271
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Sb1  Sb  0.19439268  0.02012551  0.26666741  1
+  Sb2  Sb  0.97990768  0.24660240  0.17424768  1
+  Sb3  Sb  0.07227858  0.80559641  0.82563683  1
+  Sb4  Sb  0.75350865  0.92780963  0.73342649  1
+  Cl1  Cl  0.48425393  0.30408961  0.26043567  1
+  Cl2  Cl  0.04373938  0.22391382  0.73942963  1
+  Cl3  Cl  0.77626729  0.51570337  0.81981749  1
+  Cl4  Cl  0.69582006  0.95638084  0.18014654  1
+  Cl5  Cl  0.65701749  0.75219635  0.49752060  1
+  Cl6  Cl  0.24779665  0.74520638  0.90480991  1
+  Cl7  Cl  0.84021664  0.34299027  0.09511713  1
+  Cl8  Cl  0.25499615  0.15981200  0.50270138  1
+  Cl9  Cl  0.11668898  0.41583875  0.42037319  1
+  Cl10  Cl  0.58398896  0.00460916  0.70099979  1
+  Cl11  Cl  0.30388974  0.88323084  0.29895837  1
+  Cl12  Cl  0.99541861  0.69625311  0.57942237  1
+  Cl13  Cl  0.52234882  0.65555531  0.78941686  1
+  Cl14  Cl  0.34444651  0.13376265  0.86686252  1
+  Cl15  Cl  0.26716404  0.47770063  0.13324294  1
+  Cl16  Cl  0.86627324  0.73303207  0.21068104  1
+  F1  F  0.92537813  0.88369454  0.80004636  1
+  F2  F  0.08366611  0.12539934  0.19989091  1
+  F3  F  0.87437810  0.07429352  0.95841045  1
+  F4  F  0.11616159  0.91620547  0.04173642  1

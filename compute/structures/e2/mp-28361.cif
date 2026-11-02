@@ -1,0 +1,44 @@
+# mp-28361 (Al2CdCl8) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-06-09T03:40:20.480000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_28361
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   6.71182203
+_cell_length_b   7.09332080
+_cell_length_c   12.97924428
+_cell_angle_alpha   87.41505330
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Al1  Al  0.92613899  0.43754810  0.54193735  1
+  Al2  Al  0.43461775  0.85209153  0.24103529  1
+  Al3  Al  0.56538225  0.85209153  0.74103529  1
+  Al4  Al  0.07386101  0.43754810  0.04193735  1
+  Cd1  Cd  0.74231360  0.99760275  0.50182162  1
+  Cd2  Cd  0.25768640  0.99760275  0.00182162  1
+  Cl1  Cl  0.92329915  0.46580641  0.18096689  1
+  Cl2  Cl  0.07670085  0.46580641  0.68096689  1
+  Cl3  Cl  0.62066154  0.34254574  0.56034945  1
+  Cl4  Cl  0.37933846  0.34254574  0.06034945  1
+  Cl5  Cl  0.93271946  0.69589421  0.44414505  1
+  Cl6  Cl  0.06728054  0.69589421  0.94414505  1
+  Cl7  Cl  0.42663319  0.84118126  0.58900973  1
+  Cl8  Cl  0.57336681  0.84118126  0.08900973  1
+  Cl9  Cl  0.05496022  0.21384280  0.45295829  1
+  Cl10  Cl  0.94503978  0.21384280  0.95295829  1
+  Cl11  Cl  0.13647530  0.94845893  0.20056301  1
+  Cl12  Cl  0.86352470  0.94845893  0.70056301  1
+  Cl13  Cl  0.43820828  0.59671477  0.32678495  1
+  Cl14  Cl  0.56179172  0.59671477  0.82678495  1
+  Cl15  Cl  0.58388993  0.07691450  0.31943037  1
+  Cl16  Cl  0.41611007  0.07691450  0.81943037  1

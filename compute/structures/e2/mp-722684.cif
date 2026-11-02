@@ -1,0 +1,46 @@
+# mp-722684 (AlH4KO14P4) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-06-13T21:52:25.889000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_722684
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   4.95590000
+_cell_length_b   7.55831429
+_cell_length_c   7.86991778
+_cell_angle_alpha   81.68211427
+_cell_angle_beta   83.65834344
+_cell_angle_gamma   73.91791967
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  K1  K  0.00000000  0.00000000  0.00000000  1
+  Al1  Al  0.00000000  0.50000000  0.00000000  1
+  P1  P  0.41945000  0.60466300  0.22515300  1
+  P2  P  0.58055000  0.39533700  0.77484700  1
+  P3  P  0.31310300  0.23633700  0.31603000  1
+  P4  P  0.68689700  0.76366300  0.68397000  1
+  H1  H  0.12759100  0.78227400  0.41072600  1
+  H2  H  0.87240900  0.21772600  0.58927400  1
+  H3  H  0.31379100  0.99800500  0.62150900  1
+  H4  H  0.68620900  0.00199500  0.37849100  1
+  O1  O  0.16575300  0.16468200  0.47813200  1
+  O2  O  0.83424700  0.83531800  0.52186800  1
+  O3  O  0.16172200  0.28004000  0.15119300  1
+  O4  O  0.83827800  0.71996000  0.84880700  1
+  O5  O  0.23978500  0.62809100  0.07386600  1
+  O6  O  0.76021500  0.37190900  0.92613400  1
+  O7  O  0.37896700  0.42604600  0.35385700  1
+  O8  O  0.62103300  0.57395400  0.64614300  1
+  O9  O  0.27249500  0.41161700  0.82199600  1
+  O10  O  0.72750500  0.58838300  0.17800400  1
+  O11  O  0.30752900  0.77270300  0.33200100  1
+  O12  O  0.69247100  0.22729700  0.66799900  1
+  O13  O  0.39019800  0.90251700  0.72170400  1
+  O14  O  0.60980200  0.09748300  0.27829600  1

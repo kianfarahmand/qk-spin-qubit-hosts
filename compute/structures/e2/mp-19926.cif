@@ -1,0 +1,46 @@
+# mp-19926 (Be2GeLa2O7) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2023-03-15T01:43:01.297000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_19926
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   7.67910542
+_cell_length_b   7.67910542
+_cell_length_c   4.95593186
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  La1  La  0.66062832  0.83937168  0.50206566  1
+  La2  La  0.16062832  0.66062832  0.49793434  1
+  La3  La  0.83937168  0.33937168  0.49793434  1
+  La4  La  0.33937168  0.16062832  0.50206566  1
+  Be1  Be  0.36652398  0.86652398  0.03895659  1
+  Be2  Be  0.86652398  0.63347602  0.96104341  1
+  Be3  Be  0.63347602  0.13347602  0.03895659  1
+  Be4  Be  0.13347602  0.36652398  0.96104341  1
+  Ge1  Ge  0.50000000  0.50000000  0.00000000  1
+  Ge2  Ge  0.00000000  0.00000000  0.00000000  1
+  O1  O  0.92253859  0.82647150  0.80194546  1
+  O2  O  0.17352850  0.92253859  0.19805454  1
+  O3  O  0.57746141  0.32647150  0.19805454  1
+  O4  O  0.42253859  0.67352850  0.19805454  1
+  O5  O  0.32647150  0.42253859  0.80194546  1
+  O6  O  0.67352850  0.57746141  0.80194546  1
+  O7  O  0.00000000  0.50000000  0.83470744  1
+  O8  O  0.50000000  0.00000000  0.16529256  1
+  O9  O  0.14247075  0.35752925  0.28086374  1
+  O10  O  0.64247075  0.14247075  0.71913626  1
+  O11  O  0.35752925  0.85752925  0.71913626  1
+  O12  O  0.85752925  0.64247075  0.28086374  1
+  O13  O  0.07746141  0.17352850  0.80194546  1
+  O14  O  0.82647150  0.07746141  0.19805454  1

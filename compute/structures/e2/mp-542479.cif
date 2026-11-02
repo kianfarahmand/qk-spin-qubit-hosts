@@ -1,0 +1,52 @@
+# mp-542479 (DyMnO3) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-06-15T15:47:11.433000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_542479
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   6.13604437
+_cell_length_b   6.13604441
+_cell_length_c   11.42852703
+_cell_angle_alpha   89.99999992
+_cell_angle_beta   90.00000010
+_cell_angle_gamma   119.99952033
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Dy1  Dy  0.00000005  0.00000002  0.28375272  1
+  Dy2  Dy  0.00000005  0.00000006  0.78375340  1
+  Dy3  Dy  0.33333336  0.66666672  0.23879309  1
+  Dy4  Dy  0.66666673  0.33333352  0.73879658  1
+  Dy5  Dy  0.33333351  0.66666676  0.73879664  1
+  Dy6  Dy  0.66666667  0.33333335  0.23879311  1
+  Mn1  Mn  0.33359039  0.00000606  0.00789849  1
+  Mn2  Mn  0.33357846  0.33357841  0.50789729  1
+  Mn3  Mn  0.00000000  0.66640904  0.50789751  1
+  Mn4  Mn  0.00000603  0.33359021  0.00789848  1
+  Mn5  Mn  0.66642205  0.66642203  0.00789829  1
+  Mn6  Mn  0.66640898  0.00000000  0.50789749  1
+  O1  O  0.30636286  0.00000091  0.17129199  1
+  O2  O  0.30636591  0.30636593  0.67129404  1
+  O3  O  0.00000000  0.69363292  0.67129386  1
+  O4  O  0.00000088  0.30636284  0.17129200  1
+  O5  O  0.69363839  0.69363838  0.17129217  1
+  O6  O  0.69363288  0.00000000  0.67129387  1
+  O7  O  0.64043178  0.00000000  0.34471606  1
+  O8  O  0.64043444  0.64043447  0.84471843  1
+  O9  O  0.00000052  0.35956622  0.84471823  1
+  O10  O  0.00000000  0.64043181  0.34471605  1
+  O11  O  0.35956773  0.35956774  0.34471629  1
+  O12  O  0.35956622  0.00000052  0.84471824  1
+  O13  O  0.00000065  0.00000069  0.48562013  1
+  O14  O  0.00000000  0.00000000  0.98562192  1
+  O15  O  0.33333310  0.66666653  0.02665775  1
+  O16  O  0.66666694  0.33333361  0.52665907  1
+  O17  O  0.33333358  0.66666698  0.52665907  1
+  O18  O  0.66666653  0.33333308  0.02665775  1

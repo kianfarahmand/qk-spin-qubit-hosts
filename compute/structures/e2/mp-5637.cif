@@ -1,0 +1,38 @@
+# mp-5637 (O2SrZn) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2023-03-11T10:24:22.476000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_5637
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   3.34284254
+_cell_length_b   5.82466437
+_cell_length_c   11.33983816
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Sr1  Sr  0.25000000  0.31248339  0.36861624  1
+  Sr2  Sr  0.75000000  0.68751661  0.63138376  1
+  Sr3  Sr  0.25000000  0.81248339  0.13138376  1
+  Sr4  Sr  0.75000000  0.18751661  0.86861624  1
+  Zn1  Zn  0.75000000  0.79841316  0.36956398  1
+  Zn2  Zn  0.75000000  0.29841316  0.13043602  1
+  Zn3  Zn  0.25000000  0.20158684  0.63043602  1
+  Zn4  Zn  0.25000000  0.70158684  0.86956398  1
+  O1  O  0.25000000  0.23906703  0.04108607  1
+  O2  O  0.75000000  0.76093297  0.95891393  1
+  O3  O  0.25000000  0.73906703  0.45891393  1
+  O4  O  0.75000000  0.26093297  0.54108607  1
+  O5  O  0.25000000  0.44619327  0.75842043  1
+  O6  O  0.75000000  0.05380673  0.25842043  1
+  O7  O  0.25000000  0.94619327  0.74157957  1
+  O8  O  0.75000000  0.55380673  0.24157957  1

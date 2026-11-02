@@ -361,6 +361,7 @@ def test_protocol_hash_ignores_unset_new_fields():
     d = asdict(p)
     d.pop("min_r_dipole_A")
     d.pop("store_conf_curves")
+    d.pop("cell_setting")  # S020
     old = hashlib.sha256(json.dumps(d, sort_keys=True, default=list).encode()).hexdigest()[:12]
     assert pr.protocol_hash(p) == old
     assert pr.protocol_hash(CCEProtocol(min_r_dipole_A=8.0)) != old

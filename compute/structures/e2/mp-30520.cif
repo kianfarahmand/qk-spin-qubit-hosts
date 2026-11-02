@@ -1,0 +1,50 @@
+# mp-30520 (S5Tl2) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2021-05-23T06:12:36.869000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_30520
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   6.65934205
+_cell_length_b   6.79710289
+_cell_length_c   16.81492480
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Tl1  Tl  0.43089021  0.19648668  0.14700323  1
+  Tl2  Tl  0.93089021  0.30351332  0.85299677  1
+  Tl3  Tl  0.56910979  0.69648668  0.35299677  1
+  Tl4  Tl  0.06910979  0.80351332  0.64700323  1
+  Tl5  Tl  0.18067147  0.60336596  0.03349583  1
+  Tl6  Tl  0.68067147  0.89663404  0.96650417  1
+  Tl7  Tl  0.81932853  0.10336596  0.46650417  1
+  Tl8  Tl  0.31932853  0.39663404  0.53349583  1
+  S1  S  0.94385401  0.75198912  0.82707360  1
+  S2  S  0.44385401  0.74801088  0.17292640  1
+  S3  S  0.05614599  0.25198912  0.67292640  1
+  S4  S  0.55614599  0.24801088  0.32707360  1
+  S5  S  0.23554105  0.82660600  0.85166911  1
+  S6  S  0.73554105  0.67339400  0.14833089  1
+  S7  S  0.76445895  0.32660600  0.64833089  1
+  S8  S  0.26445895  0.17339400  0.35166911  1
+  S9  S  0.92234822  0.56373429  0.47737523  1
+  S10  S  0.42234822  0.93626571  0.52262477  1
+  S11  S  0.07765178  0.06373429  0.02262477  1
+  S12  S  0.57765178  0.43626571  0.97737523  1
+  S13  S  0.07645122  0.62512672  0.37526480  1
+  S14  S  0.57645122  0.87487328  0.62473520  1
+  S15  S  0.92354878  0.12512672  0.12473520  1
+  S16  S  0.42354878  0.37487328  0.87526480  1
+  S17  S  0.07318284  0.37737849  0.30247193  1
+  S18  S  0.57318284  0.12262151  0.69752807  1
+  S19  S  0.92681716  0.87737849  0.19752807  1
+  S20  S  0.42681716  0.62262151  0.80247193  1

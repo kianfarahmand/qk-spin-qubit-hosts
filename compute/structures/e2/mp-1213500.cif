@@ -1,0 +1,54 @@
+# mp-1213500 (Cl5LaN2) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-04-28T23:33:59.501000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_1213500
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   8.04215479
+_cell_length_b   8.83113409
+_cell_length_c   12.44257628
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  La1  La  0.25000000  0.49039694  0.90587026  1
+  La2  La  0.75000000  0.50960306  0.09412974  1
+  La3  La  0.75000000  0.00960306  0.40587026  1
+  La4  La  0.25000000  0.99039694  0.59412974  1
+  N1  N  0.54665468  0.99400103  0.03235290  1
+  N2  N  0.45334532  0.00599897  0.96764710  1
+  N3  N  0.45334532  0.50599897  0.53235290  1
+  N4  N  0.04665468  0.00599897  0.96764710  1
+  N5  N  0.54665468  0.49400103  0.46764710  1
+  N6  N  0.95334532  0.99400103  0.03235290  1
+  N7  N  0.95334532  0.49400103  0.46764710  1
+  N8  N  0.04665468  0.50599897  0.53235290  1
+  Cl1  Cl  0.25000000  0.72574065  0.17414770  1
+  Cl2  Cl  0.75000000  0.27425935  0.82585230  1
+  Cl3  Cl  0.75000000  0.77425935  0.67414770  1
+  Cl4  Cl  0.25000000  0.22574065  0.32585230  1
+  Cl5  Cl  0.54360118  0.65252611  0.93569527  1
+  Cl6  Cl  0.45639882  0.34747389  0.06430473  1
+  Cl7  Cl  0.45639882  0.84747389  0.43569527  1
+  Cl8  Cl  0.04360118  0.34747389  0.06430473  1
+  Cl9  Cl  0.54360118  0.15252611  0.56430473  1
+  Cl10  Cl  0.95639882  0.65252611  0.93569527  1
+  Cl11  Cl  0.95639882  0.15252611  0.56430473  1
+  Cl12  Cl  0.04360118  0.84747389  0.43569527  1
+  Cl13  Cl  0.25000000  0.44823348  0.30067049  1
+  Cl14  Cl  0.75000000  0.55176652  0.69932951  1
+  Cl15  Cl  0.75000000  0.05176652  0.80067049  1
+  Cl16  Cl  0.25000000  0.94823348  0.19932951  1
+  Cl17  Cl  0.25000000  0.75126860  0.73417090  1
+  Cl18  Cl  0.75000000  0.24873140  0.26582910  1
+  Cl19  Cl  0.75000000  0.74873140  0.23417090  1
+  Cl20  Cl  0.25000000  0.25126860  0.76582910  1

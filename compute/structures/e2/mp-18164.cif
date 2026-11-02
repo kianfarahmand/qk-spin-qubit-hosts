@@ -1,0 +1,50 @@
+# mp-18164 (NS3Tb3) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-06-10T20:32:59.603000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_18164
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   3.84090993
+_cell_length_b   11.97909123
+_cell_length_c   12.89910936
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Tb1  Tb  0.25000000  0.54782713  0.64324298  1
+  Tb2  Tb  0.75000000  0.45217287  0.35675702  1
+  Tb3  Tb  0.25000000  0.04782713  0.85675702  1
+  Tb4  Tb  0.75000000  0.95217287  0.14324298  1
+  Tb5  Tb  0.25000000  0.71134817  0.35996025  1
+  Tb6  Tb  0.75000000  0.28865183  0.64003975  1
+  Tb7  Tb  0.25000000  0.21134817  0.14003975  1
+  Tb8  Tb  0.75000000  0.78865183  0.85996025  1
+  Tb9  Tb  0.25000000  0.06626602  0.36785889  1
+  Tb10  Tb  0.75000000  0.93373398  0.63214111  1
+  Tb11  Tb  0.25000000  0.56626602  0.13214111  1
+  Tb12  Tb  0.75000000  0.43373398  0.86785889  1
+  S1  S  0.75000000  0.72411803  0.19162531  1
+  S2  S  0.75000000  0.90685094  0.39984261  1
+  S3  S  0.25000000  0.59314906  0.89984261  1
+  S4  S  0.25000000  0.09314906  0.60015739  1
+  S5  S  0.25000000  0.86689707  0.99066347  1
+  S6  S  0.75000000  0.13310293  0.00933653  1
+  S7  S  0.25000000  0.36689707  0.50933653  1
+  S8  S  0.75000000  0.63310293  0.49066347  1
+  S9  S  0.25000000  0.27588197  0.80837469  1
+  S10  S  0.75000000  0.22411803  0.30837469  1
+  S11  S  0.25000000  0.77588197  0.69162531  1
+  S12  S  0.75000000  0.40685094  0.10015739  1
+  N1  N  0.75000000  0.96503650  0.79841801  1
+  N2  N  0.25000000  0.53496350  0.29841801  1
+  N3  N  0.75000000  0.46503650  0.70158199  1
+  N4  N  0.25000000  0.03496350  0.20158199  1

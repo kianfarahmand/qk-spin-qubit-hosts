@@ -1,0 +1,32 @@
+# mp-1217453 (Br2O4Pb3Te) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-06-08T23:05:16.835000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_1217453
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   7.19212922
+_cell_length_b   7.19212922
+_cell_length_c   5.69237800
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   133.26339300
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Te1  Te  0.81294400  0.18705600  0.00000000  1
+  Pb1  Pb  0.14292800  0.85707200  0.00000000  1
+  Pb2  Pb  0.64787400  0.35212600  0.50000000  1
+  Pb3  Pb  0.35323600  0.64676400  0.50000000  1
+  Br1  Br  0.49479500  0.50520500  0.00000000  1
+  Br2  Br  0.00140800  0.99859200  0.50000000  1
+  O1  O  0.98228800  0.47901600  0.76868300  1
+  O2  O  0.52098400  0.01771200  0.23131700  1
+  O3  O  0.52098400  0.01771200  0.76868300  1
+  O4  O  0.98228800  0.47901600  0.23131700  1

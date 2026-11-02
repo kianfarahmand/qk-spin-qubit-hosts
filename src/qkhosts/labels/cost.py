@@ -90,6 +90,24 @@ def extra_windows(t2_ms: float) -> int:
     return 2 if t2_ms < 0.03 else 1
 
 
+def dipole_ratio(n_nominal: float, n_used: float, min_r_dipole_A: float | None = None) -> float:
+    """r_dipole / r_bath after the cap or floor (which scale both radii by (n_used / n_nominal)^(1/3) from 50/15 Å)
+    and an optional r_dipole floor (`CCEProtocol.min_r_dipole_A`, S019); never above 1 (r_dipole <= r_bath)."""
+    if min_r_dipole_A is None or n_nominal <= 0:
+        return R_DIP_OVER_R_BATH
+    r_bath = R_BATH_A * (float(n_used) / float(n_nominal)) ** (1.0 / 3.0)
+    return min(1.0, max(R_DIP_OVER_R_BATH, float(min_r_dipole_A) / r_bath))
+
+
+def host_eval_seconds(params: Mapping[str, float], f: np.ndarray, d: np.ndarray, n_nominal: float,
+                      floor: float | None, cap: float | None, k_sc: float,
+                      min_r_dipole_A: float | None = None) -> float:
+    """Predicted t_eval (s) of one host from its bath mix (f, d; `bath_mix`) and nominal spins inside 50 Å."""
+    n = bath_used(n_nominal, floor, cap)
+    q = dipole_ratio(n_nominal, n, min_r_dipole_A)
+    return eval_seconds(params, n_pairs(n, q), pair_weight(f, d, params["p"]), supercell_spins(n_nominal, floor, k_sc))
+
+
 def eval_seconds(params: Mapping[str, float], pairs: float, w: float, n_sc: float) -> float:
     """t_eval (s) = a * pairs * w + b * n_sc; params keys a, b (p is already inside w)."""
     return float(params["a"]) * pairs * w + float(params["b"]) * n_sc

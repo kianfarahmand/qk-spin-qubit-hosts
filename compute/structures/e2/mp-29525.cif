@@ -1,0 +1,50 @@
+# mp-29525 (BiO3Rb3) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-06-08T23:01:45.101000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_29525
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   8.78894048
+_cell_length_b   8.78894048
+_cell_length_c   8.78894048
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   90.00000000
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Rb1  Rb  0.28654037  0.28654037  0.28654037  1
+  Rb2  Rb  0.21345963  0.71345963  0.78654037  1
+  Rb3  Rb  0.78654037  0.21345963  0.71345963  1
+  Rb4  Rb  0.71345963  0.78654037  0.21345963  1
+  Rb5  Rb  0.70856525  0.20856525  0.29143475  1
+  Rb6  Rb  0.79143475  0.79143475  0.79143475  1
+  Rb7  Rb  0.97517106  0.52482894  0.47517106  1
+  Rb8  Rb  0.52482894  0.47517106  0.97517106  1
+  Rb9  Rb  0.47517106  0.97517106  0.52482894  1
+  Rb10  Rb  0.02482894  0.02482894  0.02482894  1
+  Rb11  Rb  0.20856525  0.29143475  0.70856525  1
+  Rb12  Rb  0.29143475  0.70856525  0.20856525  1
+  Bi1  Bi  0.48332624  0.01667376  0.98332624  1
+  Bi2  Bi  0.01667376  0.98332624  0.48332624  1
+  Bi3  Bi  0.98332624  0.48332624  0.01667376  1
+  Bi4  Bi  0.51667376  0.51667376  0.51667376  1
+  O1  O  0.43933120  0.00459799  0.21501111  1
+  O2  O  0.93933120  0.49540201  0.78498889  1
+  O3  O  0.56066880  0.50459799  0.28498889  1
+  O4  O  0.49540201  0.78498889  0.93933120  1
+  O5  O  0.00459799  0.21501111  0.43933120  1
+  O6  O  0.21501111  0.43933120  0.00459799  1
+  O7  O  0.50459799  0.28498889  0.56066880  1
+  O8  O  0.99540201  0.71501111  0.06066880  1
+  O9  O  0.71501111  0.06066880  0.99540201  1
+  O10  O  0.06066880  0.99540201  0.71501111  1
+  O11  O  0.28498889  0.56066880  0.50459799  1
+  O12  O  0.78498889  0.93933120  0.49540201  1

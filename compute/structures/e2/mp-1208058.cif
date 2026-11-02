@@ -1,0 +1,50 @@
+# mp-1208058 (Bi3F10Tl) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-04-30T04:29:10.316000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_1208058
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   8.48437441
+_cell_length_b   8.48437364
+_cell_length_c   8.48437405
+_cell_angle_alpha   59.99998136
+_cell_angle_beta   59.99998426
+_cell_angle_gamma   59.99998200
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Tl1  Tl  0.24999984  0.24999996  0.24999994  1
+  Tl2  Tl  0.75000004  0.75000005  0.75000009  1
+  Bi1  Bi  0.75933663  0.24066313  0.24066320  1
+  Bi2  Bi  0.24066338  0.75933683  0.75933683  1
+  Bi3  Bi  0.24066311  0.75933669  0.24066321  1
+  Bi4  Bi  0.75933679  0.24066337  0.75933691  1
+  Bi5  Bi  0.24066321  0.24066318  0.75933661  1
+  Bi6  Bi  0.75933681  0.75933683  0.24066338  1
+  F1  F  0.82889148  0.49999986  0.49999988  1
+  F2  F  0.17110845  0.50000008  0.50000016  1
+  F3  F  0.50000004  0.82889066  0.17110923  1
+  F4  F  0.49999992  0.17110931  0.82889075  1
+  F5  F  0.49999993  0.82889148  0.49999990  1
+  F6  F  0.17110921  0.49999999  0.82889080  1
+  F7  F  0.50000007  0.17110852  0.50000013  1
+  F8  F  0.82889075  0.50000001  0.17110923  1
+  F9  F  0.49999989  0.49999985  0.82889154  1
+  F10  F  0.50000016  0.50000012  0.17110847  1
+  F11  F  0.17110915  0.82889075  0.50000002  1
+  F12  F  0.82889080  0.17110923  0.49999998  1
+  F13  F  0.11329875  0.11329893  0.11329863  1
+  F14  F  0.88670142  0.88670110  0.88670122  1
+  F15  F  0.11329897  0.11329903  0.66010300  1
+  F16  F  0.11329895  0.66010296  0.11329891  1
+  F17  F  0.88670103  0.88670094  0.33989705  1
+  F18  F  0.88670117  0.33989707  0.88670100  1
+  F19  F  0.66010298  0.11329902  0.11329899  1
+  F20  F  0.33989708  0.88670105  0.88670095  1

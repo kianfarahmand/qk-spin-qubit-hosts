@@ -1,0 +1,32 @@
+# mp-28295 (CsIO3) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-06-26T10:13:46.320000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_28295
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   4.66904371
+_cell_length_b   6.60177417
+_cell_length_c   6.61473721
+_cell_angle_alpha   90.00000000
+_cell_angle_beta   90.00000000
+_cell_angle_gamma   89.99353567
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Cs1  Cs  0.50426584  0.48584683  0.00000000  1
+  Cs2  Cs  0.49574727  0.98583032  0.50000000  1
+  I1  I  0.02144656  0.00296506  0.00000000  1
+  I2  I  0.97850865  0.50293799  0.50000000  1
+  O1  O  0.59326471  0.46939585  0.50000000  1
+  O2  O  0.01440083  0.67735987  0.28998741  1
+  O3  O  0.01440083  0.67735987  0.71001259  1
+  O4  O  0.98568432  0.17740597  0.79002830  1
+  O5  O  0.40659366  0.96949227  0.00000000  1
+  O6  O  0.98568432  0.17740597  0.20997170  1

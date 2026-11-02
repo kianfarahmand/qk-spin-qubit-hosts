@@ -1,0 +1,32 @@
+# mp-1340 (Ga2Se3) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2023-03-11T00:08:48.814000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_1340
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   6.72479408
+_cell_length_b   6.69101335
+_cell_length_c   6.79535988
+_cell_angle_alpha   80.88226342
+_cell_angle_beta   60.34368505
+_cell_angle_gamma   71.32026060
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  Ga1  Ga  0.72062830  0.50424219  0.49702354  1
+  Ga2  Ga  0.21765582  0.00424918  0.50298829  1
+  Ga3  Ga  0.41457165  0.50132712  0.17106752  1
+  Ga4  Ga  0.58565258  0.00133234  0.82894377  1
+  Se1  Se  0.25958749  0.88678089  0.15656495  1
+  Se2  Se  0.41616766  0.38677797  0.84341771  1
+  Se3  Se  0.78156398  0.36395532  0.17005395  1
+  Se4  Se  0.95162002  0.86400301  0.82992869  1
+  Se5  Se  0.09843246  0.39127649  0.51528636  1
+  Se6  Se  0.61372005  0.89125650  0.48472322  1

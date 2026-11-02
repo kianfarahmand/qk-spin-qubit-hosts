@@ -1,0 +1,42 @@
+# mp-863678 (KO12Sb3Zn4) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2022-06-22T07:42:18.166000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_863678
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   6.84340613
+_cell_length_b   6.84340613
+_cell_length_c   6.84340698
+_cell_angle_alpha   107.75692554
+_cell_angle_beta   107.75692554
+_cell_angle_gamma   107.75692883
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  K1  K  0.49568100  0.49568100  0.49568100  1
+  Zn1  Zn  0.63884200  0.02525100  0.51077600  1
+  Zn2  Zn  0.02525100  0.51077600  0.63884200  1
+  Zn3  Zn  0.51077600  0.63884200  0.02525100  1
+  Zn4  Zn  0.98192700  0.98192700  0.98192700  1
+  Sb1  Sb  0.19560600  0.06829500  0.65441400  1
+  Sb2  Sb  0.65441400  0.19560600  0.06829500  1
+  Sb3  Sb  0.06829500  0.65441400  0.19560600  1
+  O1  O  0.65476800  0.89438600  0.96223500  1
+  O2  O  0.96223500  0.65476800  0.89438600  1
+  O3  O  0.73126500  0.25110600  0.39084400  1
+  O4  O  0.39084400  0.73126500  0.25110600  1
+  O5  O  0.89438600  0.96223500  0.65476800  1
+  O6  O  0.25110600  0.39084400  0.73126500  1
+  O7  O  0.11755300  0.98566500  0.32143700  1
+  O8  O  0.98566500  0.32143700  0.11755300  1
+  O9  O  0.32143700  0.11755300  0.98566500  1
+  O10  O  0.16425600  0.73601100  0.53580000  1
+  O11  O  0.73601100  0.53580000  0.16425600  1
+  O12  O  0.53580000  0.16425600  0.73601100  1

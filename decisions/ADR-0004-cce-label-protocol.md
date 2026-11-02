@@ -164,10 +164,49 @@ Kian to note).** Evidence: 010-e2-cost (`experiments/E2_notes.md` §1-§3; `resu
 - (b) **The floor overrides the cap** (`min_bath_spins` 1,000 > `max_bath_spins` 750), so "cap 750" ran at 1,000.
 - (c) **Item 5 cap is not shown converged for dense mixed baths:** 1,000 -> 1,500 spins gives -0.061 dex (GaP) and
   -0.052 dex (CsBr) at B ∥ c, against Al2O3's -0.003 dex for 1,500 -> 3,000. The cap also shrinks r_dipole (to
-  5-8 Å), so the cause may be the pair cut-off. Check proposed as Q23 (`compute/drafts/011-cap-check.yaml`); the
+  5-8 Å), so the cause may be the pair cut-off. Check launched with Kian's OK (Q23 yes; `compute/requests/011-cap-check.yaml`, run 41499378543); the
   runner has `min_r_dipole_A` (default None = this ADR) for it. Item 5 may change after Q23.
 - (d) **Lever (a) of the old table is supported:** 10 configurations give a log10 SEM of 0.0007-0.0096 dex for capped
   baths; floored dilute hosts (CaS 0.027-0.034 dex at 10) keep 20. Not adopted here; decided with T-015.
+
+**Amendment 4 (S021, 2026-11-03; proposed; items (a) and (e) wait for Kian's Q24).** Evidence: 011-cap-check
+(`experiments/E2_notes.md` §3b; `results/cce/011-cap-check/`), cost refit `results/T-070/20261102T225835Z_44c02e3/`
+(E2_notes §2a), T-015 build (E2_notes §5).
+- (a) **Item 5 cap: offset measured, rule to choose (Q24a).** At B ∥ c, cap 1,500 is **+0.023 dex (GaP) and +0.017 dex
+  (CsBr)** above cap 3,000 (curve; per-configuration SD ≤ 0.0006 dex): a systematic offset at the 0.02 tolerance, the
+  same sign and size in both dense mixed baths. Raising only r_dipole at 1,500 spins (GaP 5.8 -> 8 Å, CsBr 7.8 -> 10 Å)
+  removes 65-73 % of it. Options, with the 500-host E2 cost (10 configurations, window prior 7):
+  1. **keep cap 1,500** (1,144 runner-h): offset about -0.02 dex for capped hosts, nearly uniform (0.017-0.023), so it
+     mostly enters the Δ intercept; host-to-host part about 0.006 dex, small next to the direction spread (0.016-0.24
+     dex) that is already part of σ_y.
+  2. **cap 1,500 + r_dipole floor 8 Å** (1,299 runner-h, +14 %): lowers GaP-like hosts to about -0.008 dex but leaves
+     CsBr-like hosts (r_dip already ≈ 8 Å) at about -0.018, so it makes the offset *less* uniform than option 1.
+  3. **cap 1,500 + r_dipole floor 10 Å** (1,990 runner-h, +74 %): CsBr -0.005 dex remaining; GaP at 10 Å untested.
+  4. **cap 3,000** (4,164 runner-h, +264 %): reference level; itself not shown converged.
+  **Claude recommends option 1 plus a cap audit:** the item-5 audit (65/20 Å rung) does nothing on capped hosts,
+  because the cap fixes the bath either way, so for capped hosts it is replaced by a **cap-3,000 rerun of one
+  direction (c) on a 5 % stratified subsample** (about 25 of the 416 capped non-dense hosts, 10 configurations: about 30
+  runner-h at the median host cost, 90 at the mean; S021 cost model). If the paired offset varies
+  across that subsample by more than 0.02 dex (SD), E2 escalates (floor or larger cap) for the affected class. The
+  offset is reported in the data card as a known label systematic.
+- (b) **Window prior (Q24b):** each E2 item starts its window search at `t_max_ms` = 7 x T2_SL instead of 50 ms; the
+  search is unchanged when the prior misses. All 21 directions of 010 pass at K = 6-8 (E2_notes §5). It saves 30 % of
+  the runner-h (3,241 -> 2,269 at 20 configurations). It changes `t_max_ms` (part of the protocol hash), not the physics;
+  labels can differ from a 50 ms start only at the fit-to-grid level.
+- (c) **`cell_setting: conventional_standard`** (item 2 made explicit): directions c, a+b, a+b+c are taken in pymatgen's
+  conventional standard cell (pymatgen pinned 2024.5.1), because 450 of the 500 draw hosts are neither cubic nor
+  hexagonal in MP's cell. Every record stores the lattice used (`cell_A`). It has not yet run on real pymatgen; the
+  first E2 request is its test (a wrong frame shows as `cell_A` differing from the expected standard cell).
+- (d) **Configuration chunks and label assembly:** a direction whose predicted time exceeds 2.5 h is split into chunks
+  of configurations with disjoint seeds (configuration k of the whole uses seed + 1 + k); the direction's curve is the
+  n_conf_ok-weighted mean of the chunks' mean curves (exact up to interpolation; `qkhosts.labels.chunks`), and the
+  label is assembled per host (`qkhosts.labels.assemble`). Physics unchanged.
+- (e) **Item 6 configurations (Q24c):** Claude recommends **10 configurations for capped and unconstrained non-dense
+  hosts** (log10 SEM 0.0007-0.0096 dex at 10 in 010, Amendment 3(d)) and **20 for floored hosts** (CaS 0.027-0.034 dex at
+  10); dense hosts keep 1. Cost 1,188 runner-h for the draw (3 requests, 527 shards, about 62 h wall at 20
+  jobs; `make_e2_request.py --n-conf 10 --n-conf-floored 20 --window-prior 7`), vs 2,269 at 20 configurations.
+- Measured I = 9/2 cost (SrO, 1,094 spins, no cap): 1,540 s per evaluation, about 9 h per direction at 20
+  configurations, so such hosts run in chunks.
 
 ## Literature inputs (T-005, S005)
 Full notes with locations: `literature/notes/kanai2022_si.md`, `literature/notes/toriyama2025.md`. Summary:

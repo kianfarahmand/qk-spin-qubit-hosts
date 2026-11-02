@@ -1,0 +1,44 @@
+# mp-1223547 (GaH2KMg3O12Si3) from the E1 OPTIMADE snapshot data/external/mp_optimade_e1/entries.jsonl.gz (last_modified 2020-11-10T21:59:51.012000)
+# MP cell as served; the E2 runner converts it to the conventional standard cell (cell_setting)
+# written by scripts/make_e2_structures.py (T-015) for results/T-014/20261031T184133Z_e1ef094/sample_adr0007.csv
+data_mp_1223547
+_symmetry_space_group_name_H-M   'P 1'
+_symmetry_Int_Tables_number   1
+_cell_length_a   5.35996000
+_cell_length_b   5.36687692
+_cell_length_c   10.58563605
+_cell_angle_alpha   99.75810636
+_cell_angle_beta   85.25203969
+_cell_angle_gamma   119.89972483
+loop_
+ _symmetry_equiv_pos_as_xyz
+  'x, y, z'
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+  K1  K  0.99958900  0.00636400  0.01929500  1
+  Mg1  Mg  0.33460300  0.16292600  0.49556900  1
+  Mg2  Mg  0.66530500  0.82942000  0.49606800  1
+  Mg3  Mg  0.00096900  0.50295500  0.49575800  1
+  Ga1  Ga  0.66584700  0.40912400  0.23165000  1
+  Si1  Si  0.33386300  0.74113200  0.22522200  1
+  Si2  Si  0.33148300  0.58941100  0.76576800  1
+  Si3  Si  0.66490000  0.25276800  0.76564500  1
+  H1  H  0.99993800  0.10814500  0.31179200  1
+  H2  H  0.00869600  0.90344000  0.69573100  1
+  O1  O  0.99912700  0.13567400  0.40501400  1
+  O2  O  0.00671200  0.87189800  0.60290000  1
+  O3  O  0.02252600  0.47031700  0.16859600  1
+  O4  O  0.99813600  0.46572700  0.82398500  1
+  O5  O  0.66411100  0.46637000  0.40661400  1
+  O6  O  0.33451800  0.79472100  0.38548500  1
+  O7  O  0.33046700  0.54205500  0.61107400  1
+  O8  O  0.66378500  0.19638400  0.61099100  1
+  O9  O  0.58516600  0.66238600  0.16751400  1
+  O10  O  0.39244300  0.03206900  0.16774400  1
+  O11  O  0.47382200  0.41553200  0.82213600  1
+  O12  O  0.52399200  0.94118100  0.82545000  1
