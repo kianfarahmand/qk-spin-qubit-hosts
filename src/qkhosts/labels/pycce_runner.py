@@ -54,6 +54,8 @@ class CCEProtocol:
     b_directions_lattice: tuple | None = ((0, 0, 1), (1, 1, 0), (1, 1, 1))  # ADR-0004 item 2 (A); None: b_direction
     max_bath_spins: int | None = 1500   # cap on spins inside r_bath (dense baths); None = no cap
     min_bath_spins: int | None = 1000   # floor on spins inside r_bath (ultra-dilute baths; provisional until 008)
+    min_r_dipole_A: float | None = None  # S019: lower bound on r_dipole after cap/floor (011 cap check); None = ADR-0004
+    store_conf_curves: bool = False     # S019 (T-015): keep every configuration's curve, for merging chunks (`chunks`)
     fit_n_range: tuple = (0.5, 6.0)     # accepted stretch exponents (fit guard)
     max_conf_fail_frac: float = 0.1     # T-068: more failed (LinAlgError) configurations than this voids the step
     order: int = 2
@@ -338,6 +340,8 @@ def _site_step(pc, cell, element, frac, r_bath, r_dipole, proto, ts=None, b_unit
         xyz, dist = distances(b0)
     else:
         raise RuntimeError(f"bath floor {proto.min_bath_spins} not reached with supercell {size} A")
+    if proto.min_r_dipole_A is not None:  # S019: hold the pair cut-off when the cap shrinks it (never above r_bath)
+        r_dipole = min(max(r_dipole, float(proto.min_r_dipole_A)), r_bath)
 
     def coh(b, t):
         return _coherence(pc, b, pos, t, r_bath, r_dipole, proto, b_unit)
@@ -386,7 +390,8 @@ def _site_step(pc, cell, element, frac, r_bath, r_dipole, proto, ts=None, b_unit
                     float).reshape(-1, 2)
     per = fits[:, 0]
     ok = per[np.isfinite(per)]
-    return {"t2_ms": t2_avg, "stretch_n": n_avg, "fit_flag": flag, "n_fit_points": npts,
+    extra = {"conf_curves": curves.tolist()} if proto.store_conf_curves else {}
+    return {**extra, "t2_ms": t2_avg, "stretch_n": n_avg, "fit_flag": flag, "n_fit_points": npts,
             "t2_ms_nls": t2_nls, "stretch_n_nls": n_nls,
             "per_conf_t2_ms": per.tolist(), "per_conf_n": fits[:, 1].tolist(),
             "n_bath_in_rbath": int((dist <= r_bath).sum()), "n_bath_in_rbath_nominal": n_nominal,
@@ -554,5 +559,10 @@ def _json_default(o):
 
 
 def protocol_hash(proto: CCEProtocol) -> str:
+    """12-hex hash of the protocol. Fields added later are left out while unset, so earlier hashes stay valid."""
     import hashlib
-    return hashlib.sha256(json.dumps(asdict(proto), sort_keys=True, default=list).encode()).hexdigest()[:12]
+    d = asdict(proto)
+    for k, unset in (("min_r_dipole_A", None), ("store_conf_curves", False)):  # S019
+        if d.get(k, unset) == unset:
+            d.pop(k, None)
+    return hashlib.sha256(json.dumps(d, sort_keys=True, default=list).encode()).hexdigest()[:12]

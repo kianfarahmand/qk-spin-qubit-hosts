@@ -75,6 +75,35 @@ def lattice_anisotropy(c: Crystal) -> float:
     return float(L.max() / L.min())
 
 
+def reduced_basis(lattice: np.ndarray, max_iter: int = 100) -> np.ndarray:
+    """A shortest-vector-reduced basis (rows, Å) of the lattice: greedy pairwise and triple reduction
+    (b_i -> b_i ± b_j, b_i ± b_j ± b_k while it shortens), sorted by length. Equivalent cells of the same
+    lattice give the same lengths, so anisotropy from it does not depend on the cell choice."""
+    b = np.asarray(lattice, float).copy()
+    combos = [(j, s) for j in range(3) for s in (1, -1)]
+    for _ in range(max_iter):
+        changed = False
+        for i in range(3):
+            others = [j for j in range(3) if j != i]
+            cands = [b[i] + s * b[j] for j, s in combos if j != i]
+            cands += [b[i] + s1 * b[others[0]] + s2 * b[others[1]] for s1 in (1, -1) for s2 in (1, -1)]
+            best = min(cands, key=lambda v: v @ v)
+            if best @ best < b[i] @ b[i] - 1e-9:
+                b[i] = best
+                changed = True
+        if not changed:
+            break
+    return b[np.argsort(np.linalg.norm(b, axis=1))]
+
+
+def reduced_anisotropy(c: Crystal) -> float:
+    """max/min length of the reduced basis (dimensionless, >= 1): a cell-independent lattice anisotropy.
+    Any cell of a cubic lattice (sc, fcc, bcc; primitive or conventional) gives 1, because fcc and bcc reduce
+    to their equal-length primitive vectors; a tetragonal or hexagonal lattice gives max(c/a, a/c)."""
+    L = np.linalg.norm(reduced_basis(c.lattice), axis=1)
+    return float(L.max() / L.min())
+
+
 def _image_range(lattice: np.ndarray, r: float) -> np.ndarray:
     """All integer translations n with enough images to cover every point within r (Å) of the cell."""
     spacing = 1.0 / np.linalg.norm(np.linalg.inv(lattice).T, axis=1)  # interplanar spacings, Å

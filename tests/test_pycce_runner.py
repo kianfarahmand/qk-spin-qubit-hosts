@@ -342,6 +342,39 @@ def test_bath_cap_in_runner(monkeypatch, tmp_path):
     assert st["r_bath_used_A"] == pytest.approx(10.5) and st["r_dipole_used_A"] == pytest.approx(15 * 10.5 / 50)
     assert st["r_bath_set_A"] == 50.0 and st["r_bath_A"] == 50.0
     assert all(kw["r_bath"] == pytest.approx(10.5) for kw in CALLS)
+    # S019: min_r_dipole_A holds the pair cut-off after the cap, but never above r_bath
+    for lo, want in ((5.0, 5.0), (40.0, 10.5)):
+        CALLS.clear()
+        res = run_material(tmp_path / "x.cif", P(n_conf=2, ladder=((50.0, 15.0),), max_bath_spins=10,
+                                                 min_r_dipole_A=lo), tmp_path / f"out{lo}")
+        st = res["sites"][0]["final"]
+        assert st["r_dipole_used_A"] == pytest.approx(want) and st["n_bath_in_rbath"] == 10
+        assert all(kw["r_dipole"] == pytest.approx(want) for kw in CALLS)
+
+
+def test_protocol_hash_ignores_unset_new_fields():
+    """S019: adding min_r_dipole_A (None) and store_conf_curves (False) keeps the hash of every earlier protocol
+    (010: d017a0484984)."""
+    from dataclasses import asdict
+    import hashlib
+    p = CCEProtocol()
+    d = asdict(p)
+    d.pop("min_r_dipole_A")
+    d.pop("store_conf_curves")
+    old = hashlib.sha256(json.dumps(d, sort_keys=True, default=list).encode()).hexdigest()[:12]
+    assert pr.protocol_hash(p) == old
+    assert pr.protocol_hash(CCEProtocol(min_r_dipole_A=8.0)) != old
+
+
+def test_store_conf_curves(fake, tmp_path):
+    """T-015 (S019): with store_conf_curves the step keeps one curve per configuration, on the step's time grid."""
+    fake({"Si": 1.0}, SI)
+    res = run_material(tmp_path / "x.cif", P(n_conf=3, ladder=((50.0, 15.0),), store_conf_curves=True), tmp_path / "a")
+    st = res["sites"][0]["final"]
+    assert len(st["conf_curves"]) == 3 and all(len(c) == len(st["curve_t_ms"]) for c in st["conf_curves"])
+    assert np.allclose(np.mean(st["conf_curves"], axis=0), st["curve_mean"])
+    res = run_material(tmp_path / "x.cif", P(n_conf=3, ladder=((50.0, 15.0),)), tmp_path / "b")
+    assert "conf_curves" not in res["sites"][0]["final"]
 
 
 def test_single_site_rule_refuses_without_abundances(fake, monkeypatch, tmp_path):

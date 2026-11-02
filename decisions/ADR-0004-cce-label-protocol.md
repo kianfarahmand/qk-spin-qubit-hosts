@@ -86,7 +86,7 @@ diamond, 4H-SiC, alpha-quartz, Si and ZnO are not members of Kanai's host list (
 collaborator (ADR-0006). The E0 reading "diamond [001] matches Table S1" was a coincidence (Si shows it).
 
 ## Cost and E2 budget per nuclear-spin class (option A, 3 directions, one site, one Actions runner)
-From E0b wall times (`experiments/E0_notes.md` §6 finding 6):
+**Superseded by Amendment 3 (S019, 010-e2-cost); kept as the E0b record.** From E0b wall times (`experiments/E0_notes.md` §6 finding 6):
 
 | class (dominant bath isotope) | example | per direction | per material (3 directions) |
 |---|---|---|---|
@@ -140,6 +140,34 @@ estimate (~9 min per material) holds only for I = 1/2. Actions' 6 h job limit me
   (`host`, S017).
 - (c) **CaO benchmark added** (Benchmarks table): label 27.5 ms; <111> mean-of-fits 0.76 of Table S1, curve 0.89 of
   Kanai's curve. Mean-of-fits is valid for CaO (0/20 failed fits), unlike CeO2.
+
+**Amendment 3 (S019, 2026-11-02; records evidence and replaces the cost table; protocol unchanged pending Q23; for
+Kian to note).** Evidence: 010-e2-cost (`experiments/E2_notes.md` §1-§3; `results/cce/010-e2-cost/`), cost model
+`results/T-070/20261102T173535Z_a4c9227/`.
+- (a) **The cost table above is superseded.** Cost per evaluation (one configuration x direction x window) follows the
+  CCE-2 pair count after the cap or floor (nearly the same for all hosts, about 0.0135 N^2 with N = 1,000-1,500) times
+  a spin-dimension weight W = (Σ f_k (2I_k+1)^p)^2 with p = 2.71 (fit on 010, validated on 007-009 within about x2
+  for I > 1/2). Measured per material (3 directions, 20 configurations unless dense):
+
+  | class (010 host) | cost per material | per direction (max) |
+  |---|---|---|
+  | I 1/2 + 3/2, capped (GaP); 1 + 3/2 (GaN) | 0.45 h; 0.73 h | 0.17 h; 0.30 h |
+  | 3/2 floored (CaS) | 0.85 h | 0.37 h |
+  | 5/2, capped (MgS; MgO in 007) | 7.2 h | 2.9 h |
+  | 7/2 dense + 3/2, capped (CsBr) | 8.8 h | 3.8 h |
+  | 9/2, 1,068 spins (SrO) | > 17.8 h (timed out) | > 5.9 h |
+  | dense, 1 configuration (CaF2; AlN) | 0.05 h; 0.44 h | 0.02 h; 0.16 h |
+
+  E2 for the ADR-0007 500-host draw: **3,281 runner-h** (6.8 days at 20 jobs, lower bound; x/÷ 2), 1,789 runner-h with
+  10 configurations, 11,942 runner-h with cap 3,000. I = 9/2 hosts carry 53 %; 64 hosts need more than one 6 h job per
+  direction (configuration-level sharding, T-015).
+- (b) **The floor overrides the cap** (`min_bath_spins` 1,000 > `max_bath_spins` 750), so "cap 750" ran at 1,000.
+- (c) **Item 5 cap is not shown converged for dense mixed baths:** 1,000 -> 1,500 spins gives -0.061 dex (GaP) and
+  -0.052 dex (CsBr) at B ∥ c, against Al2O3's -0.003 dex for 1,500 -> 3,000. The cap also shrinks r_dipole (to
+  5-8 Å), so the cause may be the pair cut-off. Check proposed as Q23 (`compute/drafts/011-cap-check.yaml`); the
+  runner has `min_r_dipole_A` (default None = this ADR) for it. Item 5 may change after Q23.
+- (d) **Lever (a) of the old table is supported:** 10 configurations give a log10 SEM of 0.0007-0.0096 dex for capped
+  baths; floored dilute hosts (CaS 0.027-0.034 dex at 10) keep 20. Not adopted here; decided with T-015.
 
 ## Literature inputs (T-005, S005)
 Full notes with locations: `literature/notes/kanai2022_si.md`, `literature/notes/toriyama2025.md`. Summary:

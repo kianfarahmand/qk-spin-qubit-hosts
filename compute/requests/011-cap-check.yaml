@@ -1,0 +1,41 @@
+# LAUNCHED S019 with Kian's OK (Q23 yes). Drafted S019 (T-070 -> T-015).
+# Results: results/cce/011-cap-check/ via `python scripts/fetch_cce_results.py 011-cap-check`.
+#
+# Purpose: cap convergence before T-015 (E2), and a measured I = 9/2 cost. Evidence: experiments/E2_notes.md §2.
+# 010 found cap 1,000 -> 1,500 (B || c) changes T2 by -0.061 dex (GaP) and -0.052 dex (CsBr), against -0.016 dex
+# (750 -> 1,500) and -0.003 dex (1,500 -> 3,000) for Al2O3 in 007. The ADR-0004 cap shrinks r_dipole with r_bath
+# (GaP 5.0 -> 5.8 Å, CsBr 6.8 -> 7.8 Å), so the shift may come from the pair cut-off crossing lattice shells, not from
+# the bath size. Two variants per host separate the two:
+#   cap3000: cap 3,000 (r_bath and r_dipole both grow: GaP r_dip ~7.3 Å);
+#   rdip:    cap 1,500 with r_dipole held at 8 Å (GaP) or 10 Å (CsBr) (`min_r_dipole_A`, runner S019).
+# Reading: cap3000 ~ rdip and both differ from cap 1,500 -> the pair cut-off matters (fix: an r_dipole floor, cheap);
+# rdip ~ cap 1,500 but cap3000 differs -> bath size matters (fix: a larger cap, about 3.6x cost per evaluation).
+# Paired design: seed 0 and the default 200 Å supercell, so configuration k is the same isotope draw as 010's
+# configuration k (cap 3,000 contains the cap-1,500 bath); compare per configuration with 010 gap-c / csbr-c.
+# SrO (87Sr, I = 9/2, 1,068 spins, r_dip 15 Å): all 3 directions of 010 timed out (> 5 h 55 min at 20 configurations);
+# 2 configurations measure t_eval. I = 9/2 hosts carry 53 % of the modelled E2 budget (results/T-070/20261102T173535Z_a4c9227, S019).
+# Predicted wall (cost model results/T-070/20261102T173535Z_a4c9227, x/÷ 2): gap-c-cap3000 ~0.4 h, gap-c-rdip8 ~0.3 h,
+# csbr-c-cap3000 (5 conf) ~2.3 h, csbr-c-rdip10 (5 conf) ~1.4 h, sro-c-conf2 ~2.2 h. One item per shard; 5 shards.
+id: 011-cap-check
+mode: cce
+nshards: 5
+protocol:
+  central_spin: 0.5
+  b_field_T: 5.0
+  site_rule: single_most_spinful
+  max_bath_spins: 1500
+  min_bath_spins: 1000
+  max_conf_fail_frac: 0.1
+  order: 2
+  method: cce
+  ladder: [[50.0, 15.0]]
+  n_conf: 20
+  as_delay: false
+  seed: 0
+  b_directions_lattice: [[0, 0, 1]]
+materials:
+  - {id: gap-c-cap3000, cif: compute/structures/e2cost/GaP_zincblende_conventional.cif, protocol: {max_bath_spins: 3000}}
+  - {id: gap-c-rdip8, cif: compute/structures/e2cost/GaP_zincblende_conventional.cif, protocol: {min_r_dipole_A: 8.0}}
+  - {id: csbr-c-cap3000, cif: compute/structures/e2cost/CsBr_rocksalt_conventional.cif, protocol: {max_bath_spins: 3000, n_conf: 5}}
+  - {id: csbr-c-rdip10, cif: compute/structures/e2cost/CsBr_rocksalt_conventional.cif, protocol: {min_r_dipole_A: 10.0, n_conf: 5}}
+  - {id: sro-c-conf2, cif: compute/structures/e2cost/SrO_rocksalt_conventional.cif, protocol: {n_conf: 2}}
