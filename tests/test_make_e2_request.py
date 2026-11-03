@@ -70,3 +70,21 @@ def test_select_hosts_only_and_exclude():
     with pytest.raises(SystemExit):
         g.select_hosts(smp, ["mp-9"], [])
     assert g.parse_ids(" mp-1, mp-2 ,") == ["mp-1", "mp-2"] and g.parse_ids(None) == []
+
+
+def test_audit_draw_and_directions():
+    """T-071 (S022): the audit draw takes only capped non-dense hosts, balanced over strata, reproducibly."""
+    rows = []
+    for s in g.STRATA:
+        for i in range(8):
+            rows.append({"mp_id": f"{s}-{i}", "sample_stratum": s, "n_bath_50A": 3000.0 if i < 6 else 900.0,
+                         "dense_share": 1.0 if i == 0 else 0.5})
+    hosts = pd.DataFrame(rows)
+    a = g.audit_draw(hosts, 10, seed=0)
+    assert a == g.audit_draw(hosts, 10, seed=0) and len(a) == 10
+    assert all(int(m.split("-")[1]) in range(1, 6) for m in a)  # capped, non-dense only
+    assert sorted(pd.Series([m[:2] for m in a]).value_counts()) == [2, 2, 3, 3]
+    assert len(g.audit_draw(hosts, 40)) == 20  # 5 eligible per stratum
+    assert g.parse_directions(None) == [0, 1, 2] and g.parse_directions("0") == [0]
+    with pytest.raises(SystemExit):
+        g.parse_directions("3")
