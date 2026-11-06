@@ -208,6 +208,15 @@ Kian to note).** Evidence: 010-e2-cost (`experiments/E2_notes.md` §1-§3; `resu
 - Measured I = 9/2 cost (SrO, 1,094 spins, no cap): 1,540 s per evaluation, about 9 h per direction at 20
   configurations, so such hosts run in chunks.
 
+### Amendment 5 (S024, 2026-11-06): PyCCE isotope-sampling guard (implementation fix; for Kian to note)
+013-e2-b01 lost 7 K hosts to a PyCCE 1.1.1 bug: `BathCell.gen_supercell` draws int(round(N c)) sites per isotope
+without replacement, and for K (39K + 40K + 41K = 1) the rounded counts exceed the N sites for about 12.5 % of
+supercell sizes (b01: 7 of 57 K hosts). The runner now recomputes PyCCE's counts before each draw and, only when an
+element overflows, lowers its most abundant isotope for that draw to exactly (round(N c) - excess) / N
+(`pycce_runner.sampling_safe_isotopes`; abundance change ≤ 1/N < 1e-4; recorded as `isotope_sampling_excess`).
+Hosts that do not overflow use PyCCE's default path and random stream unchanged, so the protocol, its hash and every
+earlier label are unchanged. Evidence: `experiments/E2_notes.md` §9; tests `tests/test_isotope_sampling_guard.py`.
+
 ## Literature inputs (T-005, S005)
 Full notes with locations: `literature/notes/kanai2022_si.md`, `literature/notes/toriyama2025.md`. Summary:
 - Kanai: S = ½, g = 2, B = 5 T along z, CCE-2 (checked against CCE-3), no quadrupole (lower bound), thermalised bath, 5–10 (benchmarks) or 10 (single elements) random configurations. Cut-offs "optimized for each condition", with no numbers given (about 1,000 bath spins). **No central-spin site rule stated.** Time axis = total free-evolution time.

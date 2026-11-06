@@ -325,15 +325,82 @@ def _adapt_window(simulate, proto: CCEProtocol) -> tuple[np.ndarray, np.ndarray,
     return ts, L, tried
 
 
+def supercell_site_counts(cell_cols: np.ndarray, n_sites: dict[str, int], size: float) -> dict[str, int]:
+    """Lattice sites per element in PyCCE 1.1.1's `BathCell.gen_supercell(size)` (size in Å; lattice
+    vectors as columns, Å): n_a * n_b * n_c * sites per cell, computed exactly as PyCCE does (int32)."""
+    c = np.asarray(cell_cols, float)
+    axb, bxc, cxa = np.cross(c[:, 0], c[:, 1]), np.cross(c[:, 1], c[:, 2]), np.cross(c[:, 2], c[:, 0])
+    na = int(size * np.linalg.norm(bxc) / (bxc @ c[:, 0]) + 1)
+    nb = int(size * np.linalg.norm(cxa) / (cxa @ c[:, 1]) + 1)
+    nc = int(size * np.linalg.norm(axb) / (axb @ c[:, 2]) + 1)
+    return {el: int(np.prod(np.array([na, nb, nc, n], dtype=np.int32), dtype=np.int32)) for el, n in n_sites.items()}
+
+
+def sampling_safe_isotopes(counts: dict[str, int], isotopes: dict[str, dict[str, float]]
+                           ) -> tuple[dict[str, dict[str, float]] | None, dict[str, int]]:
+    """Guard against PyCCE 1.1.1's isotope-sampling overflow (S024, 013-e2-b01).
+
+    PyCCE draws int(round(N * c)) sites per isotope without replacement from the N sites of an element.
+    When the spinful isotopes of an element sum to 1 (K: 39K + 40K + 41K), the rounded counts can sum
+    to N + 1 and `Generator.choice` raises "Cannot take a larger sample than population" (about 12.5 %
+    of supercell sizes for K; 7 of 57 K hosts in b01). Returns (isotopes, excess): None if no element
+    overflows (PyCCE's default path is then used unchanged); otherwise a full {element: {isotope: c}}
+    dict in the same element and isotope order, where the most abundant isotope of each overflowing
+    element is lowered to exactly (round(N c) - excess) / N, so every site gets one isotope and the
+    abundance changes by excess / N (< 1e-4). `excess` maps element -> sites removed."""
+    out, excess = {}, {}
+    for el, iso in isotopes.items():
+        n = counts.get(el)
+        iso = dict(iso)
+        if n:
+            k = {i: int(round(np.int32(n) * c)) for i, c in iso.items()}
+            over = sum(k.values()) - n
+            if over > 0:
+                top = max(iso, key=iso.get)
+                iso[top] = (k[top] - over) / n
+                if int(round(np.int32(n) * iso[top])) != k[top] - over:  # pragma: no cover (float guard)
+                    iso[top] = (k[top] - over - 0.25) / n
+                excess[el] = over
+        out[el] = iso
+    return (out if excess else None), excess
+
+
+def _default_isotopes(pc, cell) -> dict | None:
+    """The isotope dict PyCCE's gen_supercell would use: cell.isotopes if set, else common_concentrations
+    for the elements of cell.atoms, in cell.atoms order (this order fixes the random stream)."""
+    atoms = getattr(cell, "atoms", None)
+    if not isinstance(atoms, dict) or not atoms:
+        return None
+    own = getattr(cell, "isotopes", None)
+    if isinstance(own, dict) and own:
+        return {el: dict(d) for el, d in own.items()}
+    common = _isotopes(None, pc, list(atoms)) or {}
+    return {el: common[el] for el in atoms if el in common}
+
+
 def _site_step(pc, cell, element, frac, r_bath, r_dipole, proto, ts=None, b_unit=None) -> dict:
     """Ensemble over n_conf isotope seeds for one site, one field direction and one ladder step.
     Baths are generated one at a time (dense baths are large); the bath-size cap is set from config 1."""
     pos = _center_position(cell, frac)
     remove = [(element, list(frac))] if element else None  # None: centre on an empty point, nothing erased
     size = proto.supercell
+    iso_default = _default_isotopes(pc, cell)
+    iso_fix: dict[str, int] = {}
 
     def bath(k):
-        return cell.gen_supercell(size, remove=remove, seed=proto.seed + 1 + k)
+        safe_iso = None
+        if iso_default is not None and getattr(cell, "cell", None) is not None:  # S024 sampling guard
+            counts = supercell_site_counts(cell.cell, {el: len(v) for el, v in cell.atoms.items()}, size)
+            safe_iso, excess = sampling_safe_isotopes(counts, iso_default)
+            iso_fix.update(excess)
+        if safe_iso is None:
+            return cell.gen_supercell(size, remove=remove, seed=proto.seed + 1 + k)
+        old = cell.isotopes
+        cell.isotopes = safe_iso
+        try:
+            return cell.gen_supercell(size, remove=remove, seed=proto.seed + 1 + k)
+        finally:
+            cell.isotopes = old
 
     def distances(b):
         xyz = np.asarray(getattr(b, "xyz", np.empty((0, 3))), float).reshape(-1, 3)
@@ -407,6 +474,8 @@ def _site_step(pc, cell, element, frac, r_bath, r_dipole, proto, ts=None, b_unit
     per = fits[:, 0]
     ok = per[np.isfinite(per)]
     extra = {"conf_curves": curves.tolist()} if proto.store_conf_curves else {}
+    if iso_fix:  # S024: sites removed per element by the sampling guard (absent when not needed)
+        extra["isotope_sampling_excess"] = dict(iso_fix)
     return {**extra, "t2_ms": t2_avg, "stretch_n": n_avg, "fit_flag": flag, "n_fit_points": npts,
             "t2_ms_nls": t2_nls, "stretch_n_nls": n_nls,
             "per_conf_t2_ms": per.tolist(), "per_conf_n": fits[:, 1].tolist(),

@@ -25,3 +25,6 @@ paper/*.fdb_latexmk
 paper/*.synctex.gz
 paper/main.pdf
 results/**/predictions*.csv.gz
+
+# S024: large fetched batches are committed as merged.jsonl.gz (+ SHA256SUMS); the plain file stays local
+results/cce/013-e2-b01/merged.jsonl

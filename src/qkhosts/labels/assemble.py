@@ -24,6 +24,19 @@ from qkhosts.labels.batch import _protocol
 from qkhosts.labels.chunks import merge_chunks
 from qkhosts.labels.pycce_runner import CCEProtocol, _log_mean, protocol_hash
 
+def read_records(result_dir) -> list[dict]:
+    """Batch records of a fetched request: `merged.jsonl`, or `merged.jsonl.gz` (large batches are committed
+    gzipped, S024)."""
+    import gzip
+    import json
+    from pathlib import Path
+    d = Path(result_dir)
+    p = d / "merged.jsonl"
+    text = p.read_text(encoding="utf-8") if p.exists() else gzip.decompress(
+        (d / "merged.jsonl.gz").read_bytes()).decode("utf-8")
+    return [json.loads(ln) for ln in text.splitlines() if ln.strip()]
+
+
 ADR0004_DIRECTIONS = ((0, 0, 1), (1, 1, 0), (1, 1, 1))
 _CHUNK_KEYS = ("seed", "n_conf", "b_directions_lattice")
 _STATUS_RANK = {"ok": 0, "no_label": 1, "missing": 2, "error": 3, "incomplete": 4}
@@ -79,22 +92,31 @@ def assemble_labels(requests: Sequence[dict], records: Iterable[dict],
     records: batch records of those requests (keyed by request id and item id; later duplicates win).
     status: "ok" (label present), "no_label" (all items ran, but a direction fit is NaN), "missing" (an item has no
     record, e.g. a timed-out shard), "error" (an item's record is not ok), "incomplete" (the requests lack a
-    direction)."""
+    direction).
+
+    Repair (S024): an item id that appears again in a later request supersedes the earlier one (the repair request
+    re-runs failed or lost items under the same ids); `superseded` lists "<old request>/<id>" per host."""
     recs = {(r.get("request"), r.get("id")): r for r in records}
-    hosts: dict[str, list] = {}
+    hosts: dict[str, dict] = {}
+    replaced: dict[str, list] = {}
     for req in requests:
         for it in req.get("materials", []):
             if "host" not in it:
                 raise ValueError(f"{req['id']}/{it['id']}: E2 items need a 'host' key")
             p = _protocol(req, it)
-            hosts.setdefault(it["host"], []).append((req["id"], it, p))
+            slot = hosts.setdefault(it["host"], {})
+            if it["id"] in slot:
+                replaced.setdefault(it["host"], []).append(f"{slot[it['id']][0]}/{it['id']}")
+            slot[it["id"]] = (req["id"], it, p)
     rows = []
     want = [tuple(d) for d in directions]
-    for host, items in hosts.items():
+    for host, slot in hosts.items():
+        items = list(slot.values())
         by_dir: dict[tuple, list] = {}
         for rid, it, p in items:
             by_dir.setdefault(item_direction(p), []).append((rid, it, p))
-        row = {"host": host, "n_items": len(items), "status": "ok", "problems": []}
+        row = {"host": host, "n_items": len(items), "status": "ok", "problems": [],
+               "superseded": replaced.get(host, [])}
         dir_t2, dir_n, dir_mof, dir_conf, wall = [], [], [], [], 0.0
         for d in want:
             grp = by_dir.get(d)

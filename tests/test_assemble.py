@@ -102,6 +102,13 @@ def test_status_rules(fake, tmp_path):
     assert assemble_labels([short], recs)[0]["status"] == "incomplete"
     with pytest.raises(ValueError, match="host"):
         assemble_labels([{**req, "materials": [{"id": "x", "cif": "x.cif"}]}], [])
+    # S024 repair: a later request re-running item h-d0 under the same id supersedes the failed/missing one
+    rep = {"id": "rep", "mode": "cce", "protocol": dict(BASE), "materials": [items[0]]}
+    fixed = assemble_labels([req, rep], err[1:] + [dict(recs[0], request="rep")])[0]
+    assert fixed["status"] == "ok" and fixed["n_items"] == 3 and fixed["superseded"] == ["r/h-d0"]
+    assert fixed["t2_ms"] == pytest.approx(assemble_labels([req], recs)[0]["t2_ms"])
+    lost = assemble_labels([req, rep], recs[1:])[0]  # repair record not there yet: still missing
+    assert lost["status"] == "missing" and lost["problems"] == ["rep/h-d0: no record"]
 
 
 def test_check_chunks_rejects_overlap_and_mismatch():
@@ -156,3 +163,17 @@ def test_cell_setting_hash_neutral_and_validated(monkeypatch, tmp_path):
     with pytest.raises(ValueError, match="origin_kanai"):
         run_material(tmp_path / "y.cif", CCEProtocol(site_rule="origin_kanai", cell_setting="conventional_standard"),
                      tmp_path / "o")
+
+
+def test_read_records_plain_or_gzip(tmp_path):
+    """S024: large batches are committed as merged.jsonl.gz; both forms read the same records."""
+    import gzip
+    import json
+    from qkhosts.labels.assemble import read_records
+    recs = [{"id": "a", "ok": True}, {"id": "b", "ok": False}]
+    text = "\n".join(json.dumps(r) for r in recs) + "\n"
+    (tmp_path / "p").mkdir()
+    (tmp_path / "p" / "merged.jsonl").write_text(text, encoding="utf-8")
+    (tmp_path / "z").mkdir()
+    (tmp_path / "z" / "merged.jsonl.gz").write_bytes(gzip.compress(text.encode(), mtime=0))
+    assert read_records(tmp_path / "p") == read_records(tmp_path / "z") == recs

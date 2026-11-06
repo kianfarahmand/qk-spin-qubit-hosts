@@ -24,14 +24,14 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from qkhosts.labels.assemble import assemble_labels  # noqa: E402
+from qkhosts.labels.assemble import assemble_labels, read_records  # noqa: E402
 from qkhosts.run import env_text, git_state, make_run_dir  # noqa: E402
 
 
 def load(rid: str) -> tuple[dict, list[dict]]:
     d = ROOT / "results" / "cce" / rid
     req = yaml.safe_load((d / "request.yaml").read_text(encoding="utf-8"))
-    recs = [json.loads(ln) for ln in (d / "merged.jsonl").read_text(encoding="utf-8").splitlines() if ln.strip()]
+    recs = read_records(d)
     return req, recs
 
 
@@ -51,7 +51,7 @@ def main(argv: list[str] | None = None) -> int:
     dsl = pd.read_csv(ROOT / "data/processed/dsl.csv.gz")[["mp_id", "material", "t2_sl_s", "cost_class"]]
     df = df.merge(dsl, left_on="host", right_on="mp_id", how="left").drop(columns="mp_id")
     df["delta_log10"] = df["log10_t2_ms"] - np.log10(df["t2_sl_s"] * 1e3)
-    for c in ("direction_t2_ms", "n_conf_ok", "n_chunks", "problems"):
+    for c in ("direction_t2_ms", "n_conf_ok", "n_chunks", "problems", "superseded"):
         df[c] = df[c].map(json.dumps)
     ok = df[df["label_ok"]]
     m = {"requests": a.rids, "n_records": len(recs), "n_hosts": int(len(df)),

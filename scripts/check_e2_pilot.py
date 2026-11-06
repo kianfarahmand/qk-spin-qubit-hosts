@@ -32,8 +32,8 @@ COST_FACTOR = 2.0
 
 
 def records(rid: str) -> list[dict]:
-    p = ROOT / "results" / "cce" / rid / "merged.jsonl"
-    return [json.loads(ln) for ln in p.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    from qkhosts.labels.assemble import read_records
+    return read_records(ROOT / "results" / "cce" / rid)
 
 
 def lattice(cell_a: list) -> dict:
