@@ -41,6 +41,8 @@ def stats(x: pd.Series) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("labels")
     ap.add_argument("rids", nargs="+")

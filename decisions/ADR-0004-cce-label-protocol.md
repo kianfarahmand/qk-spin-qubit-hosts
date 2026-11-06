@@ -216,6 +216,15 @@ element overflows, lowers its most abundant isotope for that draw to exactly (ro
 (`pycce_runner.sampling_safe_isotopes`; abundance change ≤ 1/N < 1e-4; recorded as `isotope_sampling_excess`).
 Hosts that do not overflow use PyCCE's default path and random stream unchanged, so the protocol, its hash and every
 earlier label are unchanged. Evidence: `experiments/E2_notes.md` §9; tests `tests/test_isotope_sampling_guard.py`.
+Outcome (S025): repair 017 ran all 21 K items with the guard (`isotope_sampling_excess {K: 1}` each); 448/448 hosts of
+pilot + b01 labelled (E2_notes §10a).
+
+### Amendment 4a outcome (S025, 2026-11-06): cap audit, no escalation (records evidence; no protocol change)
+T-071 (016-e2-capaudit01; 24 capped non-dense hosts, 6 per stratum, direction c, paired with b01 by seed): log10
+T2(cap 3,000) − log10 T2(cap 1,500) = −0.0141 dex mean, SD 0.0109, all 24 negative (range −0.040 to −0.001); largest
+class SD 0.0150 (S3), below the 0.02 dex escalation limit. **Cap 1,500 stays for b02/b03.** The offset is a stated
+systematic of capped-host labels (DATA_CARD D-CCE row), not corrected. Evidence: `experiments/E2_notes.md` §10b;
+`results/T-071/20261106T173620Z_ea9a474/`.
 
 ## Literature inputs (T-005, S005)
 Full notes with locations: `literature/notes/kanai2022_si.md`, `literature/notes/toriyama2025.md`. Summary:
